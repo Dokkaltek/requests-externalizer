@@ -1,0 +1,35 @@
+<nav>
+  <a href="#" routerLink="/" id="logoLink">
+    <img src="../assets/icon/icon128.png" alt="Logo"/>
+    <caption>
+      <span id="extTitle">Request Externalizer</span>
+      <span id="extVersion">{{ globalVersion }}</span>
+    </caption>
+  </a>
+  <hr />
+  <ul>
+    <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <a routerLink="/" href="#">Settings</a>
+    </li>
+    <li routerLinkActive="active">
+      <a routerLink="/apps" href="#">Apps</a>
+    </li>
+    <li routerLinkActive="active">
+      <a routerLink="/how-to" href="#">How-to</a>
+    </li>
+    <li routerLinkActive="active">
+      <a routerLink="/about" href="#">About</a>
+    </li>
+  </ul>
+  <div id="nativeAppNotification">
+    <p>Native app status: 
+      <span (click)="testNativeAppConnection(!isNativeAppFound)"
+        [ngClass]="{'nativeAppFound': isNativeAppFound, 'nativeAppMissing': !isNativeAppFound}"></span>
+    </p>
+  </div>
+</nav>
+
+<div id="content">
+  <router-outlet></router-outlet>
+</div>
+<app-toast></app-toast>

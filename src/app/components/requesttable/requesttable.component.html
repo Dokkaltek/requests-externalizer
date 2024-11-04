@@ -1,0 +1,52 @@
+<input
+  type="text"
+  placeholder="Filter request (Regex supported)"
+  id="requestSearch"
+  [(ngModel)]="searchQuery"
+  (input)="onSearchRequest()"
+/>
+<span id="checkboxArray">
+  <label *ngFor="let type of getMediaTypes()">
+    <input type="checkbox" [value]="type" (click)="onUpdateFilter($event)" />{{
+      type | capitalize
+    }}
+  </label>
+</span>
+<hr />
+<div id="tableContainer">
+  <table>
+    <thead>
+      <th>Request</th>
+      <th>Domain</th>
+      <th>Type</th>
+    </thead>
+    <tbody>
+      <tr
+        *ngFor="let req of filteredRequests"
+        (click)="onSelectItem(req, $event)"
+        (contextmenu)="onShowContextMenu($event, req)"
+        [ngClass]="{selected : isItemSelected(req)}"
+      >
+        <td [title]="req.url">{{ getRequestPath(req.url) }}</td>
+        <td [title]="getRequestOrigin(req.url)">
+          {{ getRequestOrigin(req.url) }}
+        </td>
+        <td [title]="getRequestType(req.url, req.type)">
+          {{ getRequestType(req.url, req.type, true) }}
+        </td>
+      </tr>
+    </tbody>
+    <tfoot *ngIf="filteredRequests.length === 0">
+      <tr>
+        <td class="empty-table-placeholder" colspan="3">Nothing to show</td>
+      </tr>
+    </tfoot>
+  </table>
+  <dialog id="copyContextMenu" #copyContext>
+    <ul>
+      <li (click)="onCopyUrls(0)">Copy clicked URL</li>
+      <li (click)="onCopyUrls(1)" [hidden]="selectedItems.length === 0">Copy selection URL(s)</li>
+      <li (click)="onCopyUrls(2)" [hidden]="fullRequestList.length === 0">Copy all URLs</li>
+    </ul>
+  </dialog>
+</div>

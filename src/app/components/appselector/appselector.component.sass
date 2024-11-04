@@ -1,0 +1,89 @@
+$selectWidth: 30rem
+$selectHeight: 30px
+    
+img, span
+    padding-left: 3px
+
+/* Select box for app selector */
+.combobox
+    cursor: pointer
+    min-width: $selectWidth
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAECAYAAABCxiV9AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAeSURBVBhXY5g5c+Z/BiwALo6uAEMDTACXSWgSDAwA4jATh950E30AAAAASUVORK5CYII=') no-repeat right 6px center
+    border: 1px solid #bbb
+    height: $selectHeight
+    border-radius: 6px
+    display: flex
+    align-items: center
+
+.combobox:hover
+    background-color: #ddd
+
+.comboboxContainer
+    display: flex
+    max-width: $selectWidth
+    max-height: calc($selectHeight + 2px)
+
+/* Elements inside the select popup */
+ul
+    margin: 0
+    padding: 0
+    overflow-y: auto
+    overflow-x: hidden
+    max-height: calc($selectHeight * 4)
+    height: fit-content
+    min-width: 100%
+
+li
+    cursor: pointer
+    display: flex
+    list-style: none
+    width: $selectWidth
+    height: $selectHeight
+    align-items: center
+
+li:not(.selected-item):hover
+    background-color: rgba(175,175,175, 0.25)
+
+.selected-item
+    background-color: #132796
+    color: #fff
+
+.context-hidden
+    display: none
+
+/* We set this to -100.5% left so put it in the right position due to the flex issues of the parent */
+.context-open
+    overflow-x: hidden
+    position: relative
+    border: 1px solid #bbb
+    transform: translateY(-100%)
+    left: -100.5%
+    background-color: #fff
+
+.selected
+    margin-top: 3px
+
+.selected > span, .selected > img
+    display: table-cell
+    vertical-align: middle
+
+/* Make the image pad the entry */
+img 
+    height: 65%
+    width: auto
+    padding-left: 0.5rem
+    padding-right: 0.25rem
+
+/* Dark theme */
+:host-context(#dark-theme) 
+    .context-open
+        background-color: #222
+        color: #ccc
+        border-color: #666
+
+    .combobox
+        border-color: #666
+        background-color: #222
+
+    .combobox:hover
+        background-color: #333

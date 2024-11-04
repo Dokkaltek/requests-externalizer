@@ -1,0 +1,124 @@
+/* You can add global styles to this file, and also import other style files */
+$primary: #1749c7
+$primary-hover: #1e56e6
+$primary-active: #113aa0
+$cancel: #c71717
+$cancel-hover: #e61e1e
+$cancel-active: #a01111
+
+/* Font and scrollbar to use on the whole extension */
+*
+    font-family: 'Open Sans', sans-serif
+    scrollbar-color: #2d349b transparent
+    scrollbar-width: thin
+
+/* We have to set this here, since otherwise it won't get applied */
+html
+    height: 100vh
+
+body
+    margin: 0
+
+html app-popup
+    margin: 8px
+    width: 784px
+    max-height: 600px
+    overflow-x: visible
+    overflow-y: auto
+    display: block
+
+code, pre
+    border: 1px solid #666
+    border-radius: 6px
+    font-size: 0.8rem
+    font-family: monospace
+    background-color: #eee
+    color: #22c
+
+pre
+    padding: 1rem
+
+p, li, span, a, b
+    font-size: 0.9rem
+
+p, li
+    line-height: 1.5
+
+#popupBody
+    scrollbar-width: thin
+
+/* General style for buttons */
+.btn
+    text-decoration: none
+    color: white
+    padding: 8px 16px
+    border-radius: 5px
+    font-size: 0.9rem
+    border-color: transparent
+
+.btn.primary
+    background-color: $primary
+
+.btn.primary:hover
+    background-color: $primary-hover
+
+.btn.primary:active
+    background-color: $primary-active
+
+.btn.cancel
+    background-color: $cancel
+
+.btn.cancel:hover
+    background-color: $cancel-hover
+
+.btn.cancel:active
+    background-color: $cancel-active
+
+/* Text inputs */
+input[type="text"], textarea
+    border: 1px solid #bbb
+    border-radius: 6px
+    padding: 3px 5px
+    background-color: rgba(175, 175, 175, 0.15)
+    color: #000
+
+input[type="text"]::placeholder, textarea::placeholder
+    color: #888
+
+input[type="text"]:focus, textarea:focus
+    outline: 1px solid $primary
+
+/* Common part of settings pages */
+main
+    max-width: 45rem
+    margin-left: auto
+    margin-right: auto
+    margin-top: 3rem
+    padding-left: 1rem
+    padding-right: 1rem
+
+/* Dark theme */
+#dark-theme
+    color-scheme: dark
+    background-color: #1b1b1b
+
+    hr
+        border-color: #888
+
+    code, pre
+        background-color: #222
+        color: #bbf
+
+    p, span, td, li
+        color: #ccc
+
+    h1, h2, h3, b
+        color: #fff
+
+    input[type="text"], textarea
+        border-color: transparent
+        background-color: rgba(175, 175, 175, 0.10)
+        color: #ccc
+    
+    input[type="text"]::placeholder, textarea::placeholder
+        color: #888

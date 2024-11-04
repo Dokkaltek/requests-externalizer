@@ -1,0 +1,110 @@
+/* The search box */
+#requestSearch
+  padding: 0.3rem 1rem
+  border-radius: 2rem
+  margin-left: 1px
+  min-width: 15rem
+  width: 50%
+
+/* Media-type checkboxes */
+span > label
+  margin-right: 0.5rem
+  vertical-align: middle
+
+#checkboxArray
+  display: block
+  margin-top: 1rem
+  height: 1.6rem
+
+input[type="checkbox"]
+  margin-right: 0.3rem
+
+/* Requests table */
+table
+  border-collapse: collapse
+  table-layout: fixed
+  width: 98%
+  margin-left: 1%
+
+th, td
+  text-align: left
+  padding: 8px
+  overflow: hidden
+
+th:first-child, td:first-child
+  width: 430px
+  max-width: 430px
+  text-overflow: ellipsis
+
+th:nth-child(2), td:nth-child(2)
+  width: 204px
+  max-width: 204px
+
+tr:nth-child(even)
+  background-color: rgba(141, 122, 228, 0.15)
+
+tr
+  cursor: pointer
+
+tbody td
+  user-select: none
+
+tbody tr:not(.selected):hover td
+  background-color: rgba(175, 175, 175, 0.15)
+
+tr:nth-child(even).selected
+  background-color: rgba(42, 235, 106, 0.253)
+
+tr:nth-child(odd).selected
+  background-color: rgba(17, 192, 76, 0.253)
+
+th
+  background-color: #2d349b
+  color: white
+
+thead
+  position: sticky
+  top: 0px
+
+tfoot > tr
+  cursor: default
+
+tfoot td
+  text-align: center
+
+#tableContainer
+  overflow-x: visible
+  overflow-y: auto
+  max-height: 300px
+
+#copyContextMenu
+  top: 0
+  margin: 0
+  border: none
+  border-radius: 0.5rem
+  outline: none
+  padding: 0.5rem 0.75rem
+  background-color: #fff
+  box-shadow: 0 2px 10px rgba(0,0,0,.4)
+  
+  ul
+    margin: 0
+    list-style: none
+    padding: 0
+  
+  li
+    padding: 0.5rem
+    border-radius: 3px
+    cursor: pointer
+    color: #000
+
+  li:hover
+    background-color: rgba(150, 150, 150, 0.25)
+
+  /* Dark theme */
+:host-context(#dark-theme) 
+  #copyContextMenu
+    background-color: #151515
+    
+    li 
+      color: #ccc

@@ -1,0 +1,109 @@
+/* Main containers */
+#popupBody
+    margin-bottom: 0.5rem
+
+#titleContainer
+    display: table
+    margin-bottom: 1rem
+    margin-top: 0.5rem
+
+#titleContainer > img, #titleContainer > h3
+    display: table-cell
+
+#titleContainer > img
+    margin-right: 0.5rem
+
+#titleContainer > h3
+    vertical-align: middle
+
+#nativeAppWarning
+    display: flex
+    margin-top: 0.5rem
+    background-color: #eeff0070
+    text-align: center
+    padding: 1rem
+
+    a
+        color: #000
+        text-decoration: underline
+        font-weight: bold
+
+    p
+        margin: 0
+        color: #000
+
+    button
+        margin-left: 0.5rem
+        border: none
+        font-weight: bold
+        background-color: #e5be004f
+        display: block
+        cursor: pointer
+        text-align: center
+        color: #000
+
+    button:hover
+        background-color: #f3cb053b
+
+    button:active
+        background-color: #c9a7009e
+
+/* Settings button container on top right */
+#settingsBtnsContainer
+    border: none
+    background-color: transparent
+    position: absolute
+    padding: 3px
+    height: 2rem
+    top: 0.7rem
+    right: 0.7rem
+    display: inline-flex
+    align-items: center
+
+
+/* Buttons */
+#settingsBtnsContainer > button
+    border: none
+    background-color: transparent
+    padding-left: 5px
+    padding-right: 5px
+    height: 100%
+    border-radius: 6px #eeff0098
+
+#settingsBtnsContainer > button:hover
+    background-color: rgba(150, 150, 250, 0.2) 
+
+#settingsBtn
+    margin-left: 5px
+
+#darkThemeBtn:not(.active) .sun-icon
+    display: none
+
+#darkThemeBtn.active .moon-icon
+    display: none
+
+/* Icons */
+svg
+    height: 1.25rem
+    width: 1.25rem
+
+/* Dark theme */
+:host-context(#dark-theme) 
+    svg
+        fill: #ccc
+
+    #nativeAppWarning
+        background-color: #eeff0050
+
+        a, p, button
+            color: #fff
+
+        button
+            background-color: #ffffff3b
+
+        button:hover
+            background-color: #ffffff62
+
+        button:active
+            background-color: #00000049
+        

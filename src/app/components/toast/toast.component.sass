@@ -1,0 +1,27 @@
+/* Place toast at the bottom right side of the screen*/
+div
+    position: fixed
+    right: 1rem
+    bottom: 1rem
+    border-radius: 10px
+    color: #fff
+    padding: 0 1rem
+    transition: 300ms ease-out
+
+.visible
+    opacity: 1
+
+.hidden
+    opacity: 0
+    transform: translateY(5rem)
+
+/* Color the toast depending on the status of the message */
+.info
+    background-color: #078f29
+
+.warn
+    background-color: #d3c615
+    color: #000
+
+.error
+    background-color: #b12727

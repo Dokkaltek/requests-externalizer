@@ -1,0 +1,17 @@
+<div class="comboboxContainer">
+  <div class="combobox" (click)="onShowApplications($event)">
+    <img [src]="selectedApp.icon" height="24" width="24" alt="App icon"/>
+    <span>{{ selectedApp.name }}</span>
+  </div>
+  <ul [ngClass]="openState ? 'context-open' : 'context-hidden'">
+    <li
+      *ngFor="let app of apps; let i = index"
+      [title]="app.description"
+      [ngClass]="{'selected-item': selectedApp.name == app.name}"
+      (click)="onAppSelect(app)"
+    >
+      <img [src]="app.icon" height="24" width="24" alt="App icon"/>
+      <span>{{ app.name }}</span>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,27 @@
+<main>
+    <h1>Native application</h1>
+    <p>This extension requires of a native application to work, which by itself doesn't connect anywhere, and does everything local.</p>
+    <p>You can find the native application to download <a href="https://github.com/Dokkaltek/requests-externalizer-native-app">here</a>.</p>
+
+    <h1>Command line variables</h1>
+    <p>There are a series of variables that you can use in the command input box of the apps to specify where the url should be filled, 
+        or even what part of it.</p>
+    <p>The command variables are the following:</p>
+    <ul>
+        <li><b>{{'#{url}'}}</b> -> The full url (<code>http://localhost:4200/home?id=1#2</code>)</li>
+        <li><b>{{'#{origin}'}}</b> -> The protocol, domain and port of the complete url (<code>http://localhost:4200</code>)<
+        <li><b>{{'#{protocol}'}}</b> -> The protocol used (<code>http:</code> or <code>https:</code>)</li>
+        <li><b>{{'#{domain}'}}</b> -> Only the domain (<code>localhost</code>)</li>
+        <li><b>{{'#{port}'}}</b> -> Only the port (<code>4200</code>)</li>
+        <li><b>{{'#{path}'}}</b> -> Only the path (<code>/home</code>)</li>
+        <li><b>{{'#{query}'}}</b> -> Only the search query (<code>?id=1</code>)</li>
+        <li><b>{{'#{fragment}'}}</b> -> The fragment or part after the hash in the url (<code>#2</code>)</li>
+        <li><b>{{'#{title}'}}</b> -> The title of the tab (<code>Example app title</code>)</li>
+        <li><b>{{'#{runOnCmd}'}}</b> -> Runs the command on windows cmd terminal (Windows only)</li>
+    </ul>
+    <p>You can use any of those variables and they will be filled using the url from the context where you triggered the action.</p>
+    <p>For example, you might want to send an image to an image editor like <a href="https://www.gimp.org/">GIMP</a>. In that case you could
+        create an app where you'd set it to only show on the context menu of images with the following command:</p>
+    <pre>"C:\Program Files\GIMP 2\bin\gimp-2.10.exe" {{'#{url}'}}</pre>
+    <p>You could also execute it manually from the popup for any background request if you wanted by selecting the app you created for the command.</p>
+</main>

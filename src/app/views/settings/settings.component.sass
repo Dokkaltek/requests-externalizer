@@ -1,0 +1,108 @@
+$TabHeight: 3rem
+$NavWidth: 10rem
+
+nav
+    height: 100vh
+    width: $NavWidth
+    background-color: #ddd
+    position: fixed
+    top: 0
+
+    ul
+        padding: 0
+        margin: 0
+
+    a
+        display: block
+        text-decoration: none
+        text-align: center
+        width: 100%
+        height: 100%
+    li
+        width: 100%
+        height: $TabHeight
+        list-style-type: none
+        text-align: center
+        a
+            line-height: $TabHeight
+            font-size: 1rem
+            color: #222
+            font-weight: bold
+
+    li.active a
+        background-color: rgba(0, 0, 0, 0.2)
+
+    li:not(.active) a:hover
+        background-color: rgba(0, 0, 0, 0.1)
+
+    a > img
+        height: 4rem
+
+    caption
+        display: block
+
+    span
+        line-height: 1.5rem
+        display: block
+        text-align: center
+
+    #logoLink
+        height: auto
+
+    #extTitle
+        font-weight: bold
+
+    #extVersion
+        font-weight: bold
+        font-style: italic
+
+    hr
+        width: 80%
+        text-align: center
+
+#content
+    margin-left: $NavWidth
+
+/* Native app notification */
+#nativeAppNotification
+    padding-right: 1rem
+    padding-left: 1rem
+    text-align: center
+    position: absolute
+    width: 8rem
+    bottom: 0
+
+.nativeAppFound::after
+    content: "OK"
+    color: #20be20
+    font-weight: bold
+
+.nativeAppMissing::after
+    content: "NOT FOUND"
+    color: #dd1717
+    cursor: pointer
+    font-weight: bold
+
+/* Dark theme */
+:host-context(#dark-theme) 
+    nav
+        background-color: #222
+
+        li a
+            font-weight: normal
+            color: #ddd
+
+        li.active a
+            background-color: rgba(150, 150, 150, 0.2)
+            color: #fff
+
+        li:not(.active) a:hover
+            background-color: rgba(150, 150, 150, 0.1)
+            color: #fff
+
+        #extVersion
+            font-weight: normal
+
+@media (max-height: 390px)
+    #nativeAppNotification
+        display: none

@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Request Externalizer",
+  "version": "1.0.0",
+
+  "action": {
+    "default_icon": {
+      "16": "assets/icon/icon16.png",
+      "24": "assets/icon/icon24.png",
+      "32": "assets/icon/icon32.png"
+    },
+    "default_title": "Request Externalizer",
+    "default_popup": "index.html#/popup"
+  },
+  "options_page": "/index.html",
+  "description": "Send completed requests (any media, link, or document received) to a third party application.",
+  "icons": {
+    "16": "assets/icon/icon16.png",
+    "24": "assets/icon/icon24.png",
+    "32": "assets/icon/icon32.png",
+    "48": "assets/icon/icon48.png",
+    "128": "assets/icon/icon128.png"
+  },
+  "background": {
+    "service_worker": "assets/background.js"
+  },
+  "host_permissions": ["*://*/*"],
+  "permissions": [
+    "scripting",
+    "webRequest",
+    "activeTab",
+    "tabs",
+    "storage",
+    "contextMenus",
+    "nativeMessaging",
+    "unlimitedStorage"
+  ],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuJtmFzBrkxZvpKLzWhie3aQvluE1zzKsNcwkAk/moEnGiE+0yZgJBz9jnTAiFjJO9ldMIMxfrgRaUTZ3E2sQoT/I/qwaLmNqEiyzjDwvivH0wg3RmcWglOkyLyAdiq3Uvgk9tQRkCgjdlepvV6L8jqZ/I/x0zWNWM0ZGR4Q/eZawhBpQvMjBjNLZ5ytjTcyPwZGiO1vo34eg6LMeh6kRXf7HRqvG2xUxMC8ZdCczanAEJz/vKeXeUSW7BKF9Yjn+vKJ5NxJcRjZC8P1cbEa3Bi7JCf4ddNIJqZmFSrfIHC66m3KCVUOAANVrlFgfcEBXY+FXMdFNfDUdirqEXBiPQIDAQAB"
+}

@@ -1,0 +1,30 @@
+<div class="listboxContainer">
+    <ul>
+        <li
+        *ngFor="let app of apps; let i = index"
+        [title]="app.description"
+        [ngClass]="{'selected-item': selectedApps.includes(app)}"
+        (click)="onAppSelect($event, app)"
+        >
+            <img [src]="app.icon ? app.icon : './assets/img/add-img.png'" height="24" width="24" alt="{{app.name}} icon"/>
+            <span>{{ app.name }}</span>
+        </li>
+    </ul>
+    <div class="listboxControls">
+        <button class="listboxBtn addBtn" type="button" (click)="onAppCreate()">
+            <span>+</span>
+        </button>
+        <button class="listboxBtn removeBtn" type="button" (click)="onAppRemove()" 
+            [disabled]="selectedApps.length === 0">
+            <span>&#10799;</span>
+        </button>
+        <button class="listboxBtn moveUpBtn" type="button" (click)="onAppMove('up')" 
+            [disabled]="selectedApps.length === 0">
+            <span>🠙</span>
+        </button>
+        <button class="listboxBtn moveDownBtn" type="button" (click)="onAppMove('down')" 
+            [disabled]="selectedApps.length === 0">
+            <span>🠛</span>
+        </button>
+    </div>
+</div>

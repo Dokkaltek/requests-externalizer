@@ -1,0 +1,51 @@
+<main>
+  <h2>General settings</h2>
+  <div class="switch-container">
+    <label class="switch-content">
+      <span class="switch">
+        <input
+          type="checkbox"
+          (click)="onSettingUpdate('darkMode', $event)"
+          [checked]="globalSettings.darkMode"
+          [ngClass]="{'hidden': !settingsLoaded}"
+        />
+        <span class="slider" [ngClass]="{'hidden': !settingsLoaded}"></span>
+      </span>
+      Enable dark mode
+    </label>
+  </div>
+  <div class="switch-container">
+    <label class="switch-content">
+      <span class="switch">
+        <input
+          type="checkbox"
+          (click)="onSettingUpdate('countType', $event)"
+          [checked]="globalSettings.countType"
+          [ngClass]="{'hidden': !settingsLoaded}"
+        /> 
+        <span class="slider" [ngClass]="{'hidden': !settingsLoaded}"></span>
+      </span>
+      Only count requests with these types on extension icon:
+    </label>
+    <select
+        [disabled]="!globalSettings.countType"
+        (change)="onSettingUpdate('typeToCount', $event)"
+        [value]="globalSettings.typeToCount"
+      >
+        <option
+          *ngFor="let type of requestTypes"
+          [value]="type"
+          [selected]="globalSettings.typeToCount === type"
+        >
+          {{ type | capitalize }}
+        </option>
+    </select>
+  </div>
+
+  <span id="appsBackupContainer">
+    <button id="importBtn" class="btn primary" (click)="importAppsTrigger()">Import applications</button>
+    <input type="file" id="appsImportInput" (change)="onImportApps($event)" accept="json" hidden>
+    <button id="exportBtn" class="btn primary" (click)="exportApps()">Export applications</button>
+  </span>
+</main>
+<app-toast></app-toast>

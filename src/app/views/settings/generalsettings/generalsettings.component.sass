@@ -1,0 +1,73 @@
+$switchHeight: 15px
+    
+button
+  margin-right: 1rem
+
+span
+  display: block
+
+#appsBackupContainer
+    margin-top: 2rem
+
+#appsImportInput
+  display: none
+
+
+.hidden
+  display: none
+
+.switch-container
+  display: block
+  margin-top: 0.25rem
+  padding-top: 0.25rem
+  padding-bottom: 0.25rem
+
+.switch-content
+  font-size: 0.9rem
+
+.switch
+  position: relative
+  display: inline-block
+  width: calc($switchHeight * 2)
+  height: $switchHeight
+  margin-right: 0.5rem
+
+.switch input
+  opacity: 0
+  width: 0
+  height: 0
+
+.slider
+  position: absolute
+  cursor: pointer
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  background-color: #ccc
+  border-radius: 1em
+
+.slider:before
+  position: absolute
+  content: ""
+  height: calc($switchHeight - 5px)
+  width: calc($switchHeight - 5px)
+  left: 3px
+  bottom: 3px
+  background-color: white
+  transition: transform .4s
+  border-radius: 50%
+
+input:checked + .slider
+  background-color: #2196F3
+
+input:focus + .slider
+  box-shadow: 0 0 1px #2196F3
+
+input:checked + .slider:before
+  transform: translateX(calc($switchHeight - 1px))
+
+/* Dark theme */
+:host-context(#dark-theme) 
+  input:not(:checked) + .slider
+    background-color: #777

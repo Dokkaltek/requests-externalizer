@@ -1,0 +1,6 @@
+<h3>Send request:</h3>
+<div id="appSelectorContainer">
+  <span>To:</span>
+  <app-appselector [apps]="selectorApps" [selectedApp]="selectedApp" (selection)="onSelectionChange($event)"></app-appselector>
+  <button (click)="onRequestSend()" class="btn primary">Send</button>
+</div>
