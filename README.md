@@ -13,7 +13,7 @@ To send these requests you can configure the applications to send the selected r
 ![Program selection](https://github.com/user-attachments/assets/62aab806-19e2-45e2-94f8-8b9d7c206b14)
 
 ## Installation
-You can install it from the .crx file in the [releases](https://github.com/Dokkaltek/requests-externalizer/releases) page.
+You can install it unpackaged the zip in the [releases](https://github.com/Dokkaltek/requests-externalizer/releases) page.
 
 ## Development
 
