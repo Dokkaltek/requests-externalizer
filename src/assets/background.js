@@ -5,6 +5,7 @@ const MENU_CHILD_ID_START = 'req-ext-menuitem-';
 const SETTINGS = 'settings';
 const MENU_CONTEXT_LIST = ["page", "link", "image", "video", "audio"]
 const NATIVE_APP_NAME = "es.requests.externalizer";
+const RUNNING_ON_FIREFOX = typeof browser !== "undefined";
 let lastActiveTab;
 
 /**
@@ -13,17 +14,19 @@ let lastActiveTab;
  */
 function storeRequests(e) {
   // Ignore request if it doesn't fulfill all ignore criteria
-
+  
   // Must be an existing tab
   const isInvalidTabId = e.tabId === -1;
   // Must not be a frame request
   const isFrame = e.type?.indexOf('frame') !== -1;
   // Must not be an extension url
-  const isExtensionPath = e.initiator?.indexOf('extension://') !== -1;
+  const urlOrigin = e.originUrl || e.initiator;
+  const isExtensionPath = urlOrigin && urlOrigin?.indexOf('extension://') !== -1;
   // Must have a success status
   const isNotSuccessStatus = e.statusCode < 200 || e.statusCode > 299;
   // Must be a GET request
   const isNotGetRequest = e.method !== "GET";
+
   // Check all conditions
   if (isInvalidTabId || isFrame || isExtensionPath || isNotSuccessStatus || isNotGetRequest)
     return;
@@ -364,6 +367,14 @@ function generateChildrenContextMenuProps(applications) {
       id: MENU_CHILD_ID_START + app.id,
       parentId: MENU_PARENT_ID,
       visible: contexts.length > 0
+    }
+
+    // On firefox we need to set the icons for the context menu
+    if (RUNNING_ON_FIREFOX) {
+      contextMenuProperties.icons = {
+        "16": app.icon,
+        "32": app.icon
+      }
     }
 
     // Set context menu entry

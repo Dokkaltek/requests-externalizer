@@ -13,7 +13,32 @@ To send these requests you can configure the applications to send the selected r
 ![Program selection](https://github.com/user-attachments/assets/62aab806-19e2-45e2-94f8-8b9d7c206b14)
 
 ## Installation
-You can install it unpackaged the zip in the [releases](https://github.com/Dokkaltek/requests-externalizer/releases) page.
+You can install it unpackaged from the zip in the [releases](https://github.com/Dokkaltek/requests-externalizer/releases) page.
+
+Alternatively you can build it from scratch downloading the master branch, installing packages with `pnpm install` and then build it using angular cli with `ng build`. The resulting "dist" folder that will be created is the extension that can be used on the browsers.
+
+For Chrome/chromium browsers you will have to remove the `scripts` and `browser_specific_settings` keys from the manifest before sending the extension to upload to any store:
+
+``` JSON
+"background": {
+    "scripts": ["assets/background.js"]
+},
+"browser_specific_settings": {
+    "gecko": {
+      "id": "requests-externalizer@dokkaltek.es",
+      "strict_min_version": "109.0"
+    } 
+  },
+```
+
+For Firefox you need to remove the `service_worker` and the `key` keys from the manifest:
+
+``` JSON
+"background": {
+    "service_worker": "assets/background.js"
+},
+"key": "MIIBIjANBgkqhki ... "
+```
 
 ## Development
 

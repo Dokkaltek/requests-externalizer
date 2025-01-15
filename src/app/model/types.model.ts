@@ -39,6 +39,20 @@ export type AppChangeEvent = {
 }
 
 /**
+ * The type for the context menus.
+ */
+export type ContextMenu = {
+  title: string,
+  contexts: chrome.contextMenus.ContextType[],
+  parentId: string,
+  visible: boolean,
+  icons?: {
+    "16": string,
+    "32": string
+  }
+}
+
+/**
  * Valid levels for toast messages.
  */
 export enum ToastState {

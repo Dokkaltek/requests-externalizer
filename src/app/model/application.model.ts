@@ -24,7 +24,7 @@ export interface AppReference {
 export const DEFAULT_APP: Application = {
   id: "0",
   name: 'Create new app',
-  icon: '',
+  icon: './assets/img/add-img.png',
   command: '#{show_app_creation}',
   description: 'Triggers creation of a new app',
   contextMenu: {

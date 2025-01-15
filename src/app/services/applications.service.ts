@@ -4,6 +4,7 @@ import { AppReference, Application } from '../model/application.model';
 import { LOGGING_WARN_COLOR } from '../model/error.constants';
 import { DuplicationError } from '../model/errors.model';
 import { APPLICATIONS } from '../model/storage.constants';
+import { ContextMenu } from '../model/types.model';
 
 const APP_NAME_TOO_LONG = "The app name can't be bigger than 100 chars!";
 const DUPLICATE_NAME_ERROR = "An app with that name already exists!";
@@ -11,6 +12,7 @@ const MENU_PARENT_ID = 'request-externalizer-ext-parent-menu';
 const MENU_CHILD_ID_START = 'req-ext-menuitem-';
 const MENU_CONTEXT_LIST: chrome.contextMenus.ContextType[] = ["page", "link", "image", "video", "audio"];
 const NATIVE_APP_NAME = "es.requests.externalizer";
+const RUNNING_ON_FIREFOX = window.hasOwnProperty("browser");
 
 /**
  * Class that contains all methods related to {@link Application} handling.
@@ -259,11 +261,19 @@ export class ApplicationsService {
   modifyAppContextMenuEntry(app: Application, isUpdate: boolean = false) {
     let contexts = this.getContextsOfApp(app);
 
-    let contextMenuProperties = {
+    let contextMenuProperties : ContextMenu = {
       title: app.name,
       contexts: contexts.length === 0 ? [MENU_CONTEXT_LIST[0]] : contexts,
       parentId: MENU_PARENT_ID,
-      visible: contexts.length > 0
+      visible: contexts.length > 0,
+    }
+
+    // On firefox we need to set the icons for the context menu
+    if (RUNNING_ON_FIREFOX) {
+      contextMenuProperties.icons = {
+        "16": app.icon,
+        "32": app.icon
+      }
     }
 
     const contextId = MENU_CHILD_ID_START + app.id;

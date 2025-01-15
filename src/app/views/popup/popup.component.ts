@@ -62,7 +62,7 @@ export class PopupComponent implements OnInit {
    * Tests the native app connection and updates if it's available or not.
    */
   testNativeAppConnection() {
-    this.appService.sendToNativeApp("").catch(err => {
+    this.appService.sendToNativeApp("").then(() => this.isNativeAppInstalled = true).catch(err => {
         this.isNativeAppInstalled = false
 
         // Set the console message with a yellow color instead of console.warn to avoid the extension from showing the "errors" button on extensions page
