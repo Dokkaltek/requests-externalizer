@@ -5,6 +5,7 @@ import { LOGGING_WARN_COLOR } from '../model/error.constants';
 import { DuplicationError } from '../model/errors.model';
 import { APPLICATIONS } from '../model/storage.constants';
 import { ContextMenu } from '../model/types.model';
+import { DateTime } from "luxon";
 
 const APP_NAME_TOO_LONG = "The app name can't be bigger than 100 chars!";
 const DUPLICATE_NAME_ERROR = "An app with that name already exists!";
@@ -176,13 +177,14 @@ export class ApplicationsService {
    * - #{query} -> Only the search query (?id=1)
    * - #{fragment} -> The fragment or part after the hash in the url (#2)
    * - #{title} -> The title of the current page (Some super title of the webpage)
+   * - #{date} -> The current date in the format yyyy-MM-dd.
    * - #{runOnCmd} -> Runs the command on windows cmd terminal
    * @param url The url to use for replacements.
    * @param command The command which contains variables to replace.
    * @returns The parsed command after replacing the variables with their value.
    */
   replaceCommandVariables(url: string, command: string): string {
-    const regex = /#{(?:url|origin|protocol|domain|port|path|query|fragment|title|runOnCmd)}/gm;
+    const regex = /#{(?:url|origin|protocol|domain|port|path|query|fragment|title|date|runOnCmd)}/gm;
     let pathUrl : URL;
 
     try {
@@ -196,52 +198,114 @@ export class ApplicationsService {
     let parsedCommand = command;
 
     while ((match = regex.exec(command)) !== null) {
-        // This is necessary to avoid infinite loops with zero-width matches
-        if (match.index === regex.lastIndex) {
-            regex.lastIndex++;
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (match.index === regex.lastIndex) {
+          regex.lastIndex++;
+      }
+      
+      // The result can be accessed through the `match`-variable.
+      match.forEach(matchFound => {
+        switch(matchFound) {
+          case "#{url}":
+            parsedCommand = parsedCommand.replaceAll("#{url}", pathUrl.href);
+            break;
+          case "#{origin}":
+            parsedCommand = parsedCommand.replaceAll("#{origin}", pathUrl.origin);
+            break;
+          case "#{protocol}":
+            parsedCommand = parsedCommand.replaceAll("#{protocol}", pathUrl.protocol);
+            break;
+          case "#{domain}":
+            parsedCommand = parsedCommand.replaceAll("#{domain}", pathUrl.hostname);
+            break;
+          case "#{port}":
+            parsedCommand = parsedCommand.replaceAll("#{port}", pathUrl.port);
+            break;
+          case "#{path}":
+            parsedCommand = parsedCommand.replaceAll("#{path}", pathUrl.pathname);
+            break;
+          case "#{query}":
+            parsedCommand = parsedCommand.replaceAll("#{query}", pathUrl.search);
+            break;
+          case "#{fragment}":
+            parsedCommand = parsedCommand.replaceAll("#{fragment}", pathUrl.hash);
+            break;
+          case "#{title}":
+            parsedCommand = parsedCommand.replaceAll("#{title}", document.querySelector("title")?.innerHTML ?? "undefined");
+            break;
+          case "#{date}":
+            parsedCommand = parsedCommand.replaceAll("#{date}", this.getFormattedCurrentDate("yyyy-MM-dd"));
+            break;
+          case "#{runOnCmd}":
+            // Add 2 calls to cmd so that it instanciates a cmd terminal (the first one is required since the first command must be a program)
+            parsedCommand = parsedCommand.replaceAll("#{runOnCmd}", "cmd.exe /c start cmd.exe /c");
+            break;
+          default:
+            break;
         }
-        
-        // The result can be accessed through the `match`-variable.
-        match.forEach(matchFound => {
-          switch(matchFound) {
-            case "#{url}":
-              parsedCommand = parsedCommand.replaceAll("#{url}", pathUrl.href);
-              break;
-            case "#{origin}":
-              parsedCommand = parsedCommand.replaceAll("#{origin}", pathUrl.origin);
-              break;
-            case "#{protocol}":
-              parsedCommand = parsedCommand.replaceAll("#{protocol}", pathUrl.protocol);
-              break;
-            case "#{domain}":
-              parsedCommand = parsedCommand.replaceAll("#{domain}", pathUrl.hostname);
-              break;
-            case "#{port}":
-              parsedCommand = parsedCommand.replaceAll("#{port}", pathUrl.port);
-              break;
-            case "#{path}":
-              parsedCommand = parsedCommand.replaceAll("#{path}", pathUrl.pathname);
-              break;
-            case "#{query}":
-              parsedCommand = parsedCommand.replaceAll("#{query}", pathUrl.search);
-              break;
-            case "#{fragment}":
-              parsedCommand = parsedCommand.replaceAll("#{fragment}", pathUrl.hash);
-              break;
-            case "#{title}":
-              parsedCommand = parsedCommand.replaceAll("#{title}", document.querySelector("title")?.innerHTML ?? "undefined");
-              break;
-            case "#{runOnCmd}":
-              // Add 2 calls to cmd so that it instanciates a cmd terminal (the first one is required since the first command must be a program)
-              parsedCommand = parsedCommand.replaceAll("#{runOnCmd}", "cmd.exe /c start cmd.exe /c");
-              break;
-            default:
-              break;
-          }
-        });
+      });
     }
 
     return parsedCommand;
+  }
+
+  /**
+     * Replaces the text from the function variables with the text provided in them.
+     * @param text The full match text to parse for replacements.
+     * @param functionStartLength The index of the start of the function input parameters.
+     * @returns The text with the text replaced.
+     */
+  replaceFunctionVariablesText(text: string, functionStartLength: number): string {
+    let inputParams = text.substring(functionStartLength, text.length - 1).split(">>");
+
+    if (inputParams.length === 3) {
+      return inputParams[0].replaceAll(inputParams[1], inputParams[2]);
+    } else if (inputParams.length === 2) {
+      return inputParams[0].replaceAll(inputParams[1], "");
+    }
+
+    return text;
+  }
+
+  /**
+   * Replaces the function variables on the command text with their value.
+   * @param command The command to parse for function variables
+   * @returns The parsed command.
+   */
+  replaceFunctionVariables(command: string): string {
+    const regex = /#{(?:(replace|date|remove)):.+?}/gm;
+    let match;
+    let parsedCommand = command;
+
+    while ((match = regex.exec(command)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (match.index === regex.lastIndex) {
+          regex.lastIndex++;
+      }
+
+      match.forEach(matchFound => {
+        if (matchFound.startsWith("#{replace:")) {
+          parsedCommand = parsedCommand.replace(matchFound, this.replaceFunctionVariablesText(matchFound, 10));
+        } else if (matchFound.startsWith("#{remove:")) {
+          parsedCommand = parsedCommand.replace(matchFound, this.replaceFunctionVariablesText(matchFound, 9));
+        } else {
+          // Parse the date format
+          let format = matchFound.substring(7, matchFound.length - 1);
+          parsedCommand = parsedCommand.replaceAll(matchFound, this.getFormattedCurrentDate(format));
+        }
+      });
+    }
+
+    return parsedCommand;
+  }
+
+  /**
+   * Gets a date formatted with the given format.
+   * @param format The format to use.
+   * @returns The given date formatted.
+   */
+  getFormattedCurrentDate(format: string): string {
+    return DateTime.local().setLocale("en-US").toFormat(format);
   }
 
   /**
@@ -341,7 +405,8 @@ export class ApplicationsService {
    * @param contextInfo The information of where was the action called from if applies.
    */
   executeCommand(urlToSend: string, command: string) {
-    const passedCommand = this.replaceCommandVariables(urlToSend, command.trim());
+    let passedCommand = this.replaceCommandVariables(urlToSend, command.trim());
+    passedCommand = this.replaceFunctionVariables(passedCommand);
     console.info(`The command to send was '${passedCommand}'.`);
 
     // Send the parsed command to the native app

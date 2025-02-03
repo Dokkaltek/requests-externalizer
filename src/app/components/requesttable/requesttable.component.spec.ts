@@ -192,6 +192,31 @@ describe('RequesttableComponent', () => {
     expect(component.copyContextMenu.nativeElement.style.transform).toBe("initial");
   });
 
+  it('should show image preview when its an image', () => {
+    let tableCell = document.createElement('tr');
+    tableCell.onclick = (event: MouseEvent) => component.onShowPreview(event, new MockChromeResource());
+    tableCell.click();
+
+    expect(component.imgPreviewTooltip.nativeElement.style.top).not.toBe("0");
+    component.imgPreviewTooltip.nativeElement.style.top = "0";
+
+    let tdEl = document.createElement('td');
+    tableCell.appendChild(tdEl);
+    tdEl.onclick = (event: MouseEvent) => component.onShowPreview(event, new MockChromeResource());
+    tdEl.click();
+
+    expect(component.imgPreviewTooltip.nativeElement.style.top).not.toBe("0");
+  });
+
+  it('should hide the image preview', () => {
+    let request = new MockChromeResource();
+    request.type = "image";
+    component.urlToPreview = request.url;
+    component.onHidePreview(request);
+
+    expect(component.urlToPreview).toEqual("");
+  });
+
   it('should copy the right url when selecting the context menu actions on copy url', () => {
     spyOn(navigator.clipboard, "writeText");
     const resource = new MockChromeResource();
@@ -261,4 +286,12 @@ describe('RequesttableComponent', () => {
     expect(component.getFilteredRequests).toHaveBeenCalled();
     expect(detectChangesSpy).toHaveBeenCalled();
   })
+
+  it('should open urls on a new tab', () => {
+    let windowSpy = spyOn(window, "open");
+    component.requestToCopy = "http://localhost:8080/sample";
+    component.onOpenUrl();
+
+    expect(windowSpy).toHaveBeenCalled();
+  });
 });

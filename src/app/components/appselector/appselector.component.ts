@@ -40,7 +40,7 @@ export class AppselectorComponent implements ControlValueAccessor {
   // Opens the popup
   onShowApplications(event: MouseEvent) {
     event.stopPropagation();
-
+    
     this.openState = !this.openState;
 
     // Close the popup once the user clicks anywhere just once

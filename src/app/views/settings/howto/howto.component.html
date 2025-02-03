@@ -3,13 +3,13 @@
     <p>This extension requires of a native application to work, which by itself doesn't connect anywhere, and does everything local.</p>
     <p>You can find the native application to download <a href="https://github.com/Dokkaltek/requests-externalizer-native-app">here</a>.</p>
 
-    <h1>Command line variables</h1>
+    <h2>Command line variables</h2>
     <p>There are a series of variables that you can use in the command input box of the apps to specify where the url should be filled, 
         or even what part of it.</p>
     <p>The command variables are the following:</p>
     <ul>
         <li><b>{{'#{url}'}}</b> -> The full url (<code>http://localhost:4200/home?id=1#2</code>)</li>
-        <li><b>{{'#{origin}'}}</b> -> The protocol, domain and port of the complete url (<code>http://localhost:4200</code>)<
+        <li><b>{{'#{origin}'}}</b> -> The protocol, domain and port of the complete url (<code>http://localhost:4200</code>)</li>
         <li><b>{{'#{protocol}'}}</b> -> The protocol used (<code>http:</code> or <code>https:</code>)</li>
         <li><b>{{'#{domain}'}}</b> -> Only the domain (<code>localhost</code>)</li>
         <li><b>{{'#{port}'}}</b> -> Only the port (<code>4200</code>)</li>
@@ -24,4 +24,26 @@
         create an app where you'd set it to only show on the context menu of images with the following command:</p>
     <pre>"C:\Program Files\GIMP 2\bin\gimp-2.10.exe" {{'#{url}'}}</pre>
     <p>You could also execute it manually from the popup for any background request if you wanted by selecting the app you created for the command.</p>
+
+    <hr>
+
+    <h2>Function variables</h2>
+    <p>Apart from the command line variables you can also use function variables, which will allow you to perform some operations on the url before
+        trigerring the action. The difference with these is that these accept parameters and return the parsed values.</p>
+    <p>The function variables are the following:</p>
+    <div id="functionVars">
+        <ul>
+            <li><b>{{'#{replace:full-text>>text-to-match>>text-that-replaces-it}'}}</b> -> Replaces ocurrences of <code>text-to-match</code> inside <code>full-text</code> with <code>text-that-replaces-it</code>. Accepts regex, and you can also inline command variables.</li>
+            <li><b>{{'#{remove:full-text>>text-to-remove}'}}</b> -> Removes the <code>text-to-remove</code> from the url. Accepts regex, and you can also inline command variables.</li>
+            <li><b>{{'#{date:optional-date-format}'}}</b> -> Adds the current date with the format <code>yyyy-MM-dd</code>. If <code>optional-date-format</code> is present it will use the format you specify instead. You can check the tokens to use <a href="https://moment.github.io/luxon/#/formatting?id=table-of-tokens">here</a>.</li>
+        </ul>
+    </div>
+    <p>Here are some examples on their use:</p>
+    <ul>
+        <li><code>{{'#{replace:https://example.com/abc>>abc>>xyz}'}}</code> -> This would result in <code>https://example.com/xyz</code></li>
+        <li><code>{{'#{remove:https://example.com/abc>>abc}'}}</code> -> This would result in <code>https://example.com/</code></li>
+        <li><code>{{'#{date:yyyy-MM-dd HH:mm:ss.SSS}'}}</code> -> This would result in <code>{{ getDate("yyyy-MM-dd HH:mm:ss.SSS") }}</code>.</li>
+        <li><code>{{'#{date}'}}</code> -> This would result in <code>{{ getDate("yyyy-MM-dd") }}</code>.</li>
+    </ul>
+
 </main>

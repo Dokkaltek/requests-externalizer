@@ -5,9 +5,9 @@ import { Application } from "./application.model";
  */
 export class MediaTypes {
   document = ['document', 'font'];
-  video = ['video', 'xmlhttprequest / mpd', 'xmlhttprequest / m3u8'];
+  video = ['video', 'xmlhttprequest / mpd', 'xmlhttprequest / m3u8', 'media / mp4', 'media / webm'];
   image = ['image'];
-  audio = ['media / mp3'];
+  audio = ['media / mp3', 'media / opus', 'media / flac'];
   script = ['script', 'stylesheet'];
   misc = ['other'];
 }

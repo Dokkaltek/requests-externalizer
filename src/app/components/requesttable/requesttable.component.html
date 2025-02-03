@@ -24,6 +24,8 @@
       <tr
         *ngFor="let req of filteredRequests"
         (click)="onSelectItem(req, $event)"
+        (mouseover)="onShowPreview($event, req)"
+        (mouseout)="onHidePreview(req)"
         (contextmenu)="onShowContextMenu($event, req)"
         [ngClass]="{selected : isItemSelected(req)}"
       >
@@ -31,8 +33,8 @@
         <td [title]="getRequestOrigin(req.url)">
           {{ getRequestOrigin(req.url) }}
         </td>
-        <td [title]="getRequestType(req.url, req.type)">
-          {{ getRequestType(req.url, req.type, true) }}
+        <td class="request-type" [title]="getRequestType(req.url, req.type, true)">
+          {{ getIconType(req.url, req.type) }}
         </td>
       </tr>
     </tbody>
@@ -44,9 +46,11 @@
   </table>
   <dialog id="copyContextMenu" #copyContext>
     <ul>
+      <li (click)="onOpenUrl()">Open URL in new tab</li>
       <li (click)="onCopyUrls(0)">Copy clicked URL</li>
       <li (click)="onCopyUrls(1)" [hidden]="selectedItems.length === 0">Copy selection URL(s)</li>
       <li (click)="onCopyUrls(2)" [hidden]="fullRequestList.length === 0">Copy all URLs</li>
     </ul>
   </dialog>
+  <div id="imgPreview" role="tooltip" #imgPreviewTooltip><img [src]="urlToPreview" alt="Request preview"></div>
 </div>

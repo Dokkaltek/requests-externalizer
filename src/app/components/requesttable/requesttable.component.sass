@@ -78,6 +78,22 @@ tfoot td
   overflow-y: auto
   max-height: 300px
 
+
+#imgPreview 
+  background: #222222af
+  padding: 5px
+  border-radius: 4px
+  width: max-content
+  position: absolute
+  top: 0
+  left: 0
+  pointer-events: none
+  opacity: 0
+
+  img
+    max-width: 120px
+    max-height: 120px
+
 #copyContextMenu
   top: 0
   margin: 0
@@ -101,6 +117,9 @@ tfoot td
 
   li:hover
     background-color: rgba(150, 150, 150, 0.25)
+
+.request-type
+  text-align: center
 
   /* Dark theme */
 :host-context(#dark-theme) 

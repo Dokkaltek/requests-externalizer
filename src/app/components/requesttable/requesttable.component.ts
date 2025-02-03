@@ -7,9 +7,9 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
+import { LOGGING_WARN_COLOR } from 'src/app/model/error.constants';
 import { MediaTypes } from 'src/app/model/types.model';
 import { PAGE_REQUESTS } from '../../model/storage.constants';
-import { LOGGING_WARN_COLOR } from 'src/app/model/error.constants';
 
 @Component({
   selector: 'app-requesttable',
@@ -20,6 +20,7 @@ export class RequesttableComponent implements OnInit {
   // Event that triggers when element selection changes
   @Output() requestsSelection: EventEmitter<string[]> = new EventEmitter();
   @ViewChild("copyContext") copyContextMenu: ElementRef = new ElementRef(null);
+  @ViewChild("imgPreviewTooltip") imgPreviewTooltip: ElementRef = new ElementRef(null);
   // List of all unfiltered requests for the tab
   fullRequestList: chrome.webRequest.ResourceRequest[] = [];
   // List of tag-filtered requests
@@ -38,6 +39,8 @@ export class RequesttableComponent implements OnInit {
   searchQuery: string = '';
   // The request clicked to be copied
   requestToCopy: string = '';
+  // The image to show the preview of.
+  urlToPreview: string = '';
 
   constructor(private changeDetection: ChangeDetectorRef) {}
 
@@ -134,6 +137,52 @@ export class RequesttableComponent implements OnInit {
         type + ' / ' + reqLastPath.split('.')[reqLastPath.split('.').length - 1]
       );
     else return type;
+  }
+
+  /**
+   * Gets request type, and appends extension if present
+   * @param request The request to parse the type of.
+   * @param type The type to parse.
+   * @returns The parsed type of the request.
+   */
+  getIconType(request: string, type: string) {
+    let reqType = this.getRequestType(request, type, true);
+    let ext: string | undefined;
+    if (reqType.includes("/")) {
+      ext = reqType.split("/")[1].trim();
+      reqType = reqType.split("/")[0].trim();
+    }
+
+    switch(reqType) {
+      case "request":
+        reqType = "📄";
+        break;
+      case "script":
+        reqType = "📜";
+        break;
+      case "stylesheet":
+        reqType = "🎨";
+        break;
+      case "media":
+        if (ext === "mp3" || ext == "m4a" || ext === "flac" || ext === "opus")
+          reqType = "🎵";
+        else 
+          reqType = "🎞️";
+        break;
+      case "image":
+        reqType = "🖼️";
+        break;
+      case "font":
+        reqType = "🖋️";
+        break;
+      default:
+        reqType = "🌐";
+        break;
+    }
+
+    if (ext)
+      return reqType + " / " + ext;
+    return reqType;
   }
 
   /**
@@ -286,8 +335,16 @@ export class RequesttableComponent implements OnInit {
 
     event.preventDefault();
 
+    // We hide the preview if it was being shown
+    if (this.imgPreviewTooltip.nativeElement.style.opacity === "1")
+      this.hidePreview();
+
     const nodeTag = clickTarget.tagName;
     if (nodeTag === "TR" || nodeTag === "TD") {
+      // Hide the context menu using opacity and open it to be able to get the bounding client rect
+      this.copyContextMenu.nativeElement.style.opacity = 0;
+      this.copyContextMenu.nativeElement.show();
+
       const popupRect = this.copyContextMenu.nativeElement.getBoundingClientRect();
       const pageWidth = document.documentElement.clientWidth;
       const pageVisibleHeight = document.documentElement.clientHeight;
@@ -306,8 +363,9 @@ export class RequesttableComponent implements OnInit {
 
       this.copyContextMenu.nativeElement.style.transform = `translate(${popupX}px, ${popupY}px)`;
       this.requestToCopy = request.url;
-      
-      this.copyContextMenu.nativeElement.show();
+
+      // After all other calculations are performed, show the context menu
+      this.copyContextMenu.nativeElement.style.opacity = 1;
 
       // Make sure the element is closed if they try to open the native context menu
       this.registerContextCloseEvent();
@@ -315,6 +373,51 @@ export class RequesttableComponent implements OnInit {
 
     // Forces hiding the context menu
     return false;
+  }
+
+  /**
+   * Shows the preview of an image request.
+   * @param request The request to show the preview of
+   */
+  onShowPreview(event: MouseEvent, request: chrome.webRequest.ResourceRequest) {
+    if (request.type !== "image" || this.copyContextMenu.nativeElement.open) return;
+    this.urlToPreview = request.url;
+    this.imgPreviewTooltip.nativeElement.childNodes[0].src = request.url;
+
+    let clickTarget = <HTMLInputElement> event.target;
+    const nodeTag = clickTarget.tagName;
+
+    if (nodeTag === "TD" && clickTarget?.parentElement?.tagName === "TR")
+      clickTarget = <HTMLInputElement> clickTarget.parentElement;
+
+    const previewRect = this.imgPreviewTooltip.nativeElement.getBoundingClientRect();
+    const targetRect = clickTarget.getBoundingClientRect();
+    const pageWidth = document.documentElement.clientWidth;
+    const heightOffset = 8;
+    let elementX = (pageWidth - previewRect.width)/2;
+    let elementY = targetRect.top - previewRect.height - heightOffset;
+
+    this.imgPreviewTooltip.nativeElement.style.top = elementY + "px";
+    this.imgPreviewTooltip.nativeElement.style.left = elementX + "px";
+
+    this.imgPreviewTooltip.nativeElement.style.opacity = 1;
+  }
+
+  /**
+   * Shows the preview of an image request.
+   * @param request The request to show the preview of
+   */
+  onHidePreview(request: chrome.webRequest.ResourceRequest) {
+    if (request.type !== "image") return;
+    this.hidePreview();
+  }
+
+  /**
+   * Hides the image preview.
+   */
+  hidePreview() {
+    this.urlToPreview = '';
+    this.imgPreviewTooltip.nativeElement.style.opacity = 0;
   }
 
   /**
@@ -342,6 +445,14 @@ export class RequesttableComponent implements OnInit {
 
     // Copy to clipboard
     navigator.clipboard.writeText(urlToCopy);
+  }
+
+  /**
+   * Opens the url on a new tab.
+   * @param action The action number to perform.
+   */
+  onOpenUrl() {
+    window.open(this.requestToCopy, "_blank");
   }
 
   // --- HELPER FUNCTIONS --- //

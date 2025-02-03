@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
-import { Application, DEFAULT_APP } from 'src/app/model/application.model';
+import { Application } from 'src/app/model/application.model';
 import { AppChangeEvent, AppEventType, ToastState } from 'src/app/model/types.model';
 import { ApplicationsService } from 'src/app/services/applications.service';
 
@@ -156,8 +156,10 @@ export class AppsettingsComponent implements OnInit {
     if (this.formData.status == "INVALID") 
       return;
     
+    let selApp = this.selectedApps[0];
+
     let newApp: Application = {
-      id: this.selectedApps[0].id,
+      id: selApp.id,
       name: this.formData.value.name,
       description: this.formData.value.description,
       icon: this.iconData ? this.iconData : './assets/img/add-img.png',
@@ -193,7 +195,6 @@ export class AppsettingsComponent implements OnInit {
     this.registeredApps = resultApps;
     this.toast.showToast(`App ${this.formData.value.name} saved correctly`, ToastState.INFO);
     this.formData.controls["applications"].setValue(this.registeredApps);
-    this.resetForm();
   }
 
   /**

@@ -1,3 +1,5 @@
+import { luxon } from "./lib/luxon.min.js";
+const DateTime = luxon.DateTime;
 const PAGE_REQUESTS = 'pageRequests';
 const APPLICATIONS = 'applications';
 const MENU_PARENT_ID = 'request-externalizer-ext-parent-menu';
@@ -6,6 +8,7 @@ const SETTINGS = 'settings';
 const MENU_CONTEXT_LIST = ["page", "link", "image", "video", "audio"]
 const NATIVE_APP_NAME = "es.requests.externalizer";
 const RUNNING_ON_FIREFOX = typeof browser !== "undefined";
+let requestsStore = {tabs: {}};
 let lastActiveTab;
 
 /**
@@ -31,27 +34,25 @@ function storeRequests(e) {
   if (isInvalidTabId || isFrame || isExtensionPath || isNotSuccessStatus || isNotGetRequest)
     return;
 
-  chrome.storage.local.get(PAGE_REQUESTS).then(result => {
-    let newResult = result.pageRequests || {};
-    chrome.tabs.get(e.tabId).then(requestTab => {
-      let requestOrigin = new URL(requestTab.url).origin;
+  // Use a global variable to make sure that we keep all new requests due to race conditions
+  chrome.tabs.get(e.tabId).then(requestTab => {
+    let requestOrigin = new URL(requestTab.url).origin;
 
-      // Make sure that the domain entry is initialized
-      if (newResult.tabs[e.tabId] === undefined) newResult.tabs[e.tabId] = {};
-      if (newResult.tabs[e.tabId][requestOrigin] === undefined)
-        newResult.tabs[e.tabId][requestOrigin] = [];
+    // Make sure that the domain entry is initialized
+    if (requestsStore.tabs[e.tabId] === undefined) requestsStore.tabs[e.tabId] = {};
+    if (requestsStore.tabs[e.tabId][requestOrigin] === undefined)
+      requestsStore.tabs[e.tabId][requestOrigin] = [];
 
-      // Add request to storage and remove duplicates
-      for (let request of newResult.tabs[e.tabId][requestOrigin]) {
-        if (request.url === e.url) return;
-      }
+    // Add request to storage and remove duplicates
+    for (let request of requestsStore.tabs[e.tabId][requestOrigin]) {
+      if (request.url === e.url) return;
+    }
 
-      newResult.tabs[e.tabId][requestOrigin].push(e);
-      chrome.storage.local.set({ pageRequests: newResult });
+    requestsStore.tabs[e.tabId][requestOrigin].push(e);
+    chrome.storage.local.set({ pageRequests: requestsStore });
 
-      // Add number of found requests for the current tab on the extension icon
-      updateBadgeIfNecessary(e.tabId);
-    });
+    // Add number of found requests for the current tab on the extension icon
+    updateBadgeIfNecessary(e.tabId);
   });
 }
 
@@ -149,29 +150,25 @@ async function getCurrentTab() {
  * @returns 
  */
 function updateTabs(tabId, changedInfo, tab) {
-  if (changedInfo.status !== 'complete') return;
+  if (changedInfo.status !== 'complete' || !hasTabRequests(requestsStore, tabId)) return;
 
-  chrome.storage.local.get(PAGE_REQUESTS).then(result => {
-    if (!hasTabRequests(result, tabId)) return;
+  if (Object.keys(requestsStore.tabs[tabId]).length > 0) {
+    let newTabOrigin = new URL(tab.url).origin;
+    let registeredDomains = Object.keys(requestsStore.tabs[tabId]);
 
-    if (Object.keys(result[PAGE_REQUESTS].tabs[tabId]).length > 0) {
-      let newResult = result[PAGE_REQUESTS];
-      let newTabOrigin = new URL(tab.url).origin;
-      let registeredDomains = Object.keys(newResult.tabs[tabId]);
-
-      if (registeredDomains.length >= 2) {
-        if (!registeredDomains.includes(newTabOrigin)) {
-          newResult.tabs[tabId] = {};
-        } else {
-          registeredDomains.forEach(domain => {
-            if (domain !== newTabOrigin) delete newResult.tabs[tabId][domain];
-          });
-        }
-        chrome.storage.local
-          .set({ pageRequests: newResult });
+    if (registeredDomains.length >= 2) {
+      if (!registeredDomains.includes(newTabOrigin)) {
+        requestsStore.tabs[tabId] = {};
+      } else {
+        registeredDomains.forEach(domain => {
+          if (domain !== newTabOrigin) delete requestsStore.tabs[tabId][domain];
+        });
       }
+      chrome.storage.local
+        .set({ pageRequests: requestsStore });
     }
-  });
+  }
+
   updateBadgeIfNecessary(tabId);
 }
 
@@ -201,8 +198,8 @@ function updateBadgeIfNecessary(updatedTabId) {
 function hasTabRequests(storeObject, tabId) {
   if (!tabId) return false;
   return (
-    storeObject[PAGE_REQUESTS].tabs != null &&
-    storeObject[PAGE_REQUESTS].tabs[tabId]
+    storeObject.tabs != null &&
+    storeObject.tabs[tabId]
   );
 }
 
@@ -211,18 +208,13 @@ function hasTabRequests(storeObject, tabId) {
  * @param {*} tabId The tab identifier to delete their requests.
  */
 function removeTabs(tabId) {
-  if (!tabId) return;
+  if (!tabId || !hasTabRequests(requestsStore, tabId)) return;
 
-  chrome.storage.local.get(PAGE_REQUESTS).then(result => {
-    if (!hasTabRequests(result, tabId)) return;
-
-    if (Object.keys(result[PAGE_REQUESTS].tabs[tabId]).length > 0) {
-      let newResult = result[PAGE_REQUESTS];
-      delete newResult.tabs[tabId];
-      chrome.storage.local
-        .set({ pageRequests: newResult });
-    }
-  });
+  if (Object.keys(requestsStore.tabs[tabId]).length > 0) {
+    delete requestsStore.tabs[tabId];
+    chrome.storage.local
+      .set({ pageRequests: requestsStore });
+  }
 }
 
 /**
@@ -234,6 +226,15 @@ function storeAndUpdateActiveTab(activeInfo) {
   // getActiveTab returns undefined
   lastActiveTab = activeInfo.tabId;
   updateBadge();
+}
+
+/**
+   * Gets a date formatted with the given format.
+   * @param format The format to use.
+   * @returns The given date formatted.
+   */
+function getFormattedCurrentDate(format) {
+  return DateTime.local().setLocale("en-US").toFormat(format);
 }
 
 /**
@@ -256,7 +257,7 @@ function storeAndUpdateActiveTab(activeInfo) {
    * @returns The parsed command after replacing the variables with their value.
    */
 function replaceCommandVariables(url, command, tab) {
-  const regex = /#{(?:url|origin|protocol|domain|port|path|query|fragment|title|runOnCmd)}/gm;
+  const regex = /#{(?:url|origin|protocol|domain|port|path|query|fragment|title|date|runOnCmd)}/gm;
   const pathUrl = new URL(url);
 
   let match;
@@ -297,6 +298,9 @@ function replaceCommandVariables(url, command, tab) {
           case "#{title}":
             command = command.replaceAll("#{title}", tab?.title ?? "");
             break;
+          case "#{date}":
+            command = command.replaceAll("#{date}", getFormattedCurrentDate("yyyy-MM-dd"));
+            break;
           case "#{runOnCmd}":
             // Add 2 calls to cmd so that it instanciates a cmd terminal (the first one is required since the first command must be a program)
             command = command.replaceAll("#{runOnCmd}", "cmd.exe /c start cmd.exe /c");
@@ -308,6 +312,56 @@ function replaceCommandVariables(url, command, tab) {
   }
 
   return command;
+}
+
+/**
+     * Replaces the text from the function variables with the text provided in them.
+     * @param text The full match text to parse for replacements.
+     * @param functionStartLength The index of the start of the function input parameters.
+     * @returns The text with the text replaced.
+     */
+function replaceFunctionVariablesText(text, functionStartLength) {
+  let inputParams = text.substring(functionStartLength, text.length - 1).split(">>");
+
+  if (inputParams.length === 3) {
+    return inputParams[0].replaceAll(inputParams[1], inputParams[2]);
+  } else if (inputParams.length === 2) {
+    return inputParams[0].replaceAll(inputParams[1], "");
+  }
+
+  return text;
+}
+
+/**
+   * Replaces the function variables on the command text with their value.
+   * @param command The command to parse for function variables
+   * @returns The parsed command.
+   */
+function replaceFunctionVariables(command) {
+  const regex = /#{(?:(replace|date|remove)):.+?}/gm;
+  let match;
+  let parsedCommand = command;
+
+  while ((match = regex.exec(command)) !== null) {
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (match.index === regex.lastIndex) {
+        regex.lastIndex++;
+    }
+
+    match.forEach(matchFound => {
+      if (matchFound.startsWith("#{replace:")) {
+        parsedCommand = parsedCommand.replace(matchFound, replaceFunctionVariablesText(matchFound, 10));
+      } else if (matchFound.startsWith("#{remove:")) {
+        parsedCommand = parsedCommand.replace(matchFound, replaceFunctionVariablesText(matchFound, 9));
+      } else {
+        // Parse the date format
+        let format = matchFound.substring(7, matchFound.length - 1);
+        parsedCommand = parsedCommand.replaceAll(matchFound, getFormattedCurrentDate(format));
+      }
+    });
+  }
+
+  return parsedCommand;
 }
 
 /**
@@ -439,7 +493,9 @@ function performContextMenuCommand(info, tab) {
   chrome.storage.local.get(APPLICATIONS).then(result => {
     let app = result[APPLICATIONS].filter(item => item.id === appId)
     if (app.length > 0) {
-      const passedCommand = replaceCommandVariables(urlToSend, app[0].command.trim(), tab);
+      let passedCommand = replaceCommandVariables(urlToSend, app[0].command.trim(), tab);
+      passedCommand = replaceFunctionVariables(passedCommand);
+      console.log(`The command to send was '${passedCommand}'.`);
 
       // Perform the command
       chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: passedCommand});
@@ -463,6 +519,8 @@ function initialize() {
     // Initialize only if required
     if (!result[PAGE_REQUESTS])
       chrome.storage.local.set({ pageRequests: requestsObj });
+
+    requestsStore = requestsObj;
 
     console.info('Starting Externalizer with requests storage: ', requestsObj)
   });

@@ -52,6 +52,11 @@ export class ApporganizerComponent implements ControlValueAccessor {
     this.onChange(this.selectedApps);
   }
 
+  // Checks if an app is selected
+  checkAppSelection(app: Application) {
+    return this.selectedApps.map(selApp => selApp.id).includes(app.id);
+  }
+
   // Registers a new app
   onAppCreate() {
     // If the app already exists we just select it and nothing else

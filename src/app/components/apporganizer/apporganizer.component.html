@@ -3,7 +3,7 @@
         <li
         *ngFor="let app of apps; let i = index"
         [title]="app.description"
-        [ngClass]="{'selected-item': selectedApps.includes(app)}"
+        [ngClass]="{'selected-item': checkAppSelection(app)}"
         (click)="onAppSelect($event, app)"
         >
             <img [src]="app.icon ? app.icon : './assets/img/add-img.png'" height="24" width="24" alt="{{app.name}} icon"/>

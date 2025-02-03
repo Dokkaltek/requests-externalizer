@@ -4,6 +4,7 @@ import { DEFAULT_APP, NEW_APP } from '../model/application.model';
 import { MockTab, SAMPLE_URL } from '../model/mocks.model';
 import { APPLICATIONS } from '../model/storage.constants';
 import { ApplicationsService } from './applications.service';
+import { DateTime } from 'luxon';
 
 const sinonChrome = require('sinon-chrome');
 global.chrome = sinonChrome;
@@ -113,19 +114,26 @@ describe('ApplicationsService', () => {
   it('should replace the command variables', () => {
     let result = service.replaceCommandVariables(SAMPLE_URL, "#{runOnCmd} #{url}");
     let titleElement = document?.querySelector('title');
-
+    
     if (titleElement != null) {
       titleElement.innerHTML = "Fancy title";
     }
-
+    
     expect(result).toEqual("cmd.exe /c start cmd.exe /c https://this.is.a.test.com/test.html#test?param=1");
-
-    result = service.replaceCommandVariables(SAMPLE_URL, "test.exe #{origin} -t #{title}");
-    expect(result).toEqual(`test.exe https://this.is.a.test.com -t ${titleElement?.innerHTML ?? "undefined"}`);
+    
+    result = service.replaceCommandVariables(SAMPLE_URL, "test.exe #{origin} -t #{title}-#{date}");
+    
+    const currentDate = DateTime.local().setLocale("en-US").toFormat("yyyy-MM-dd");
+    expect(result).toEqual(`test.exe https://this.is.a.test.com -t ${titleElement?.innerHTML ?? "undefined"}-${currentDate}`);
 
     result = service.replaceCommandVariables("http://localhost:4200/test.html?param=1#test", 
       "test.exe #{protocol}//#{domain}:#{port}#{path}#{fragment}#{query}");
     expect(result).toEqual(`test.exe http://localhost:4200/test.html#test?param=1`);
+  });
+
+  it('should replace function variables', () => {
+    let result = service.replaceFunctionVariables("test.exe #{replace:sometext>>some>>my} #{remove:there was something>> something} #{date:yyyy}");
+    expect(result).toEqual(`test.exe mytext there was ${new Date().getFullYear()}`);
   });
 
   it('should get the current tab', fakeAsync(() => {
