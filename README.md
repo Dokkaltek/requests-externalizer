@@ -17,18 +17,19 @@ You can install it unpackaged from the zip in the [releases](https://github.com/
 
 Alternatively you can build it from scratch downloading the master branch, installing packages with `pnpm install` and then build it using angular cli with `ng build`. The resulting "dist" folder that will be created is the extension that can be used on the browsers.
 
-For Chrome/chromium browsers you will have to remove the `scripts` and `browser_specific_settings` keys from the manifest before sending the extension to upload to any store:
+For Chrome/chromium browsers you will have to remove the `scripts`, `key` and `browser_specific_settings` keys from the manifest before sending the extension to upload to any store:
 
 ``` JSON
 "background": {
     "scripts": ["assets/background.js"]
 },
 "browser_specific_settings": {
-    "gecko": {
-      "id": "requests-externalizer@dokkaltek.es",
-      "strict_min_version": "109.0"
-    } 
-  },
+  "gecko": {
+    "id": "requests-externalizer@dokkaltek.es",
+    "strict_min_version": "109.0"
+  } 
+},
+"key": "MIIBIjANBgkqhki ... "
 ```
 
 For Firefox you need to remove the `service_worker` and the `key` keys from the manifest:
