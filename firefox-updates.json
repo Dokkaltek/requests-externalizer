@@ -1,0 +1,15 @@
+{
+  "addons": {
+    "requests-externalizer@dokkaltek.es": {
+      "updates": [
+        {
+          "version": "1.0.0",
+          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.0/request-externalizer-firefox.xpi",
+          "applications": {
+            "gecko": { "strict_min_version": "126" }
+          }
+        }
+      ]
+    }
+  }
+}
