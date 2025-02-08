@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Application, DEFAULT_APP, NEW_APP } from 'src/app/model/application.model';
 import { AppChangeEvent, AppEventType } from 'src/app/model/types.model';
@@ -25,6 +25,8 @@ export class ApporganizerComponent implements ControlValueAccessor {
   selection = new EventEmitter<Application[]>();
   @Output()
   appListChange = new EventEmitter<AppChangeEvent>();
+  @ViewChild("appList")
+  appList: ElementRef = new ElementRef(null);
 
   touched = false;
   disabled = false;
@@ -69,9 +71,13 @@ export class ApporganizerComponent implements ControlValueAccessor {
       newApp = existingNewApps[0];
 
     this.selectedApps = [newApp];
+    
     this.onChange(this.selectedApps);
 
     this.selection.emit(this.selectedApps);
+
+    // Since the list size is updated, we need to scroll the new app into view after a short delay
+    setTimeout(() => this.scrollSelectedAppIntoView(), 50);
   }
   
   // Removes a registered app
@@ -146,8 +152,18 @@ export class ApporganizerComponent implements ControlValueAccessor {
     }
 
     this.appListChange.emit(moveEvent);
+    this.scrollSelectedAppIntoView();
   }
 
+  /**
+   * Scrolls the selected app into view
+   */
+  scrollSelectedAppIntoView() {
+    const selectedApp = this.appList.nativeElement.getElementsByClassName("selected-item")[0];
+    if (selectedApp != undefined) {
+      selectedApp.scrollIntoView({ behavior: "smooth" });
+    }
+  }
 
   // ------------------------------------------------------------
   // These are required to make it accesible from reactive forms
