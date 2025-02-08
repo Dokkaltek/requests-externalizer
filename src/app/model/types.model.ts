@@ -4,12 +4,12 @@ import { Application } from "./application.model";
  * Media type for requests
  */
 export class MediaTypes {
-  document = ['document', 'font'];
-  video = ['video', 'xmlhttprequest / mpd', 'xmlhttprequest / m3u8', 'media / mp4', 'media / webm'];
-  image = ['image'];
-  audio = ['media / mp3', 'media / opus', 'media / flac'];
+  document = ['document', 'font', 'other / json', 'other / xml'];
+  video = ['video', 'media', 'xmlhttprequest / mpd', 'xmlhttprequest / m3u8', 'media / mp4', 'media / webm'];
+  image = ['image', 'xmlhttprequest / svg'];
+  audio = ['media / mp3', 'media / opus', 'media / m4a', 'media / flac'];
   script = ['script', 'stylesheet'];
-  misc = ['other'];
+  misc = ['other', 'xmlhttprequest'];
 }
 
 /**

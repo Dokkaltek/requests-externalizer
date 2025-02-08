@@ -15,6 +15,13 @@
           "applications": {
             "gecko": { "strict_min_version": "126" }
           }
+        },
+        {
+          "version": "1.0.2",
+          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.2/request-externalizer-firefox.xpi",
+          "applications": {
+            "gecko": { "strict_min_version": "126" }
+          }
         }
       ]
     }

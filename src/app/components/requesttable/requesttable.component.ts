@@ -201,26 +201,27 @@ export class RequesttableComponent implements OnInit {
     let filteredRequests = this.requests.filter((request) => {
       if (this.activeFilters.length === 0) return true;
 
-      let type: string = request.type;
-      if (type === 'media' || type === 'xmlhttprequest')
-        type = this.getRequestType(request.url, type);
+      let type = this.getRequestType(request.url, request.type);
 
       for (const filter of this.activeFilters) {
         // Check the type of element to filter the ticked ones
-        let isOnNonMiscType =
-          this.mediaTypes[filter as keyof MediaTypes]?.includes(type);
-        let containsOddMediaExt =
-          type.includes('mpd') || type.includes('m3u8') || type.includes('mp3');
-        let isMiscType = filter === 'misc';
-        let containsMediaTypes =
-          type.startsWith('media') || type.startsWith('xmlhttprequest');
-        let isMediaType = type === 'media' || type === 'xmlhttprequest';
-
-        if (
-          isOnNonMiscType ||
-          (isMiscType &&
-            ((containsMediaTypes && !containsOddMediaExt) || isMediaType))
-        )
+        const simpleType = type.split("/")[0].trim();
+        
+        // If the filter is misc, check if the type is odd video or odd image
+        if (filter === "misc") {
+          const isOddVideoOrImage = simpleType === "xmlhttprequest" && 
+            (this.mediaTypes["video"].includes(type) || this.mediaTypes["image"].includes(type));
+          const isOddDocument = simpleType === "other" && (this.mediaTypes["document"].includes(type));
+          if (isOddVideoOrImage || isOddDocument)
+            continue;
+        }
+        
+        // If the filter is video and the type is media and it's an audio type, we exit the filter
+        if (filter === "video" && simpleType === "media" && this.mediaTypes["audio"].includes(type))
+          continue;
+          
+        const allowedMediaTypes = this.mediaTypes[filter as keyof MediaTypes];
+        if (allowedMediaTypes?.includes(type) || allowedMediaTypes?.includes(simpleType))
           return true;
       }
       return false;

@@ -8,6 +8,8 @@ const SETTINGS = 'settings';
 const MENU_CONTEXT_LIST = ["page", "link", "image", "video", "audio"]
 const NATIVE_APP_NAME = "es.requests.externalizer";
 const RUNNING_ON_FIREFOX = typeof browser !== "undefined";
+const AUDIO_EXTENSIONS = ["mp3", "m4a", "flac", "opus"];
+const VIDEO_EXTENSIONS = ["mpd", "m3u8", "mp4", "webm"];
 let requestsStore = {tabs: {}};
 let lastActiveTab;
 
@@ -63,21 +65,29 @@ function updateBadge() {
   getCurrentTab()
     .then(tab => {
       if (!tab) return;
+      let updatedText = '';
 
-      chrome.storage.local.get(PAGE_REQUESTS).then(result => {
-        let updatedText = '';
-
-        // Get number of requests on the current tab domain
-        if (tab.url && tab.id && result[PAGE_REQUESTS].tabs[tab.id]) {
+      // Get number of requests on the current tab domain
+      chrome.storage.local.get(SETTINGS).then(result => {
+        let settings;
+        if (result[SETTINGS]) settings = result[SETTINGS];
+        if (tab.url && tab.id && requestsStore.tabs[tab.id]) {
           let tabOrigin = '';
           try {
             tabOrigin = new URL(tab.url).origin;
-            let originRequests = result[PAGE_REQUESTS].tabs[tab.id][tabOrigin];
-            if (originRequests) updatedText = originRequests.length + '';
+            let originRequests = requestsStore.tabs[tab.id][tabOrigin];
+
+            if (settings?.countType)
+                originRequests = originRequests.filter(request => {
+              console.log("resolved request type:", resolveRequestType(request.url, request.type));
+              return resolveRequestType(request.url, request.type) === settings.typeToCount
+            });
+
+            if (originRequests?.length > 0) updatedText = originRequests.length + '';
           } catch (err) {
             console.info(
               `❌ Tab url origin or tab id wasn't valid. Url = ${tabOrigin}, TabId = ${tab.id}`,
-              result[PAGE_REQUESTS].tabs,
+              requestsStore.tabs, err
             );
           }
         }
@@ -362,6 +372,55 @@ function replaceFunctionVariables(command) {
   }
 
   return parsedCommand;
+}
+
+/**
+ * Resolves the type of the request.
+ * @param {string} request The request url to resolve the type of.
+ * @param {string} type The type to resolve.
+ * @returns The resolved type of the request.
+ */
+function resolveRequestType(request, type) {
+  let extension = "";
+  let reqArray = request.split('/');
+  let reqLastPath = reqArray[reqArray.length - 1]
+    .split('#')[0]
+    .split('?')[0]
+    .split('=')[0];
+  if (reqLastPath.indexOf('.') !== -1)
+    extension = reqLastPath.split('.')[reqLastPath.split('.').length - 1]
+    
+  let resultingType;
+  switch(type) {
+    case "xmlhttprequest":
+      if (VIDEO_EXTENSIONS.includes(extension))
+        resultingType = "video";
+      else if (extension === "svg")
+        resultingType = "image";
+      else resultingType = "misc";
+      break;
+    case "font": 
+      resultingType = "document";
+      break;
+    case "media":
+      if (AUDIO_EXTENSIONS.includes(extension))
+        resultingType = "audio";
+      else resultingType = "video";
+      break;
+    case "stylesheet":
+      resultingType = "script";
+      break;
+    case "other":
+      if (extension === "json" || extension === "xml") 
+        resultingType = "document";
+      else resultingType = "misc";
+      break;
+    default:
+      resultingType = type;
+      break;
+  }
+
+  return resultingType;
 }
 
 /**
