@@ -632,5 +632,6 @@ chrome.tabs.onActivated.addListener(storeAndUpdateActiveTab);
 chrome.tabs.onUpdated.addListener(updateTabs);
 chrome.tabs.onRemoved.addListener(removeTabs);
 
-// Initializes the settings and creates the context menu entries
+// Initializes the settings and creates the context menu entries on browser restart and on extension install
 chrome.runtime.onInstalled.addListener(initialize);
+chrome.runtime.onStartup.addListener(initialize);
