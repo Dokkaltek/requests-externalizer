@@ -77,10 +77,12 @@ function updateBadge() {
             tabOrigin = new URL(tab.url).origin;
             let originRequests = requestsStore.tabs[tab.id][tabOrigin];
 
-            if (settings?.countType)
+            if (originRequests?.length > 0) {
+              if (settings?.countType)
                 originRequests = originRequests.filter(request => resolveRequestType(request.url, request.type) === settings.typeToCount);
 
-            if (originRequests?.length > 0) updatedText = originRequests.length + '';
+              if (originRequests.length > 0) updatedText = originRequests.length + '';
+            }
           } catch (err) {
             console.info(
               `❌ Tab url origin or tab id wasn't valid. Url = ${tabOrigin}, TabId = ${tab.id}`,

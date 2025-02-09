@@ -4,28 +4,35 @@
       "updates": [
         {
           "version": "1.0.0",
-          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.0/request-externalizer-firefox.xpi",
+          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.0/requests-externalizer-firefox.xpi",
           "applications": {
             "gecko": { "strict_min_version": "126" }
           }
         },
         {
           "version": "1.0.1",
-          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.1/request-externalizer-firefox.xpi",
+          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.1/requests-externalizer-firefox.xpi",
           "applications": {
             "gecko": { "strict_min_version": "126" }
           }
         },
         {
           "version": "1.0.2",
-          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.2/request-externalizer-firefox.xpi",
+          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.2/requests-externalizer-firefox.xpi",
           "applications": {
             "gecko": { "strict_min_version": "126" }
           }
         },
         {
           "version": "1.0.5",
-          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.5/request-externalizer-firefox.xpi",
+          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.5/requests-externalizer-firefox.xpi",
+          "applications": {
+            "gecko": { "strict_min_version": "126" }
+          }
+        },
+        {
+          "version": "1.0.6",
+          "update_link": "https://github.com/Dokkaltek/requests-externalizer/releases/download/1.0.6/requests-externalizer-firefox.xpi",
           "applications": {
             "gecko": { "strict_min_version": "126" }
           }
