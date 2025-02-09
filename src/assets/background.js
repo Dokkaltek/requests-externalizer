@@ -561,7 +561,8 @@ function performContextMenuCommand(info, tab) {
       console.info(`The command to send was '${passedCommand}'.`);
 
       // Perform the command
-      chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: passedCommand});
+      chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: passedCommand}).catch(err => console.info(
+        "❌An unexpected error happened while sending the command to the native app.", err));
     }
   })
 }
