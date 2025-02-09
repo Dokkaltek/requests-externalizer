@@ -59,9 +59,13 @@ export class ApplicationsService {
   importApplications(importedApps: Application[]) {
     console.info('Importing applications: ', importedApps);
     importedApps.forEach(importedApp => {
-      if (!this.apps.find(app => app.id == importedApp.id))
+      if (!this.apps.find(app => app.id == importedApp.id)) {
+        this.modifyAppContextMenuEntry(importedApp);
         this.apps.push(importedApp);
+      }
     });
+
+    this.updateParentContextMenuVisibility(this.apps);
 
     chrome.storage.local.set({ applications: this.apps.slice() });
   }
@@ -169,6 +173,7 @@ export class ApplicationsService {
    * 
    * The variables supported are:
    * - #{url} -> The full url (http://localhost:4200/home?id=1#2)
+   * - #{rawUrl} -> The url without query params or fragment (http://localhost:4200/home)
    * - #{origin} -> The domain, protocol, and port of the complete url (http://localhost:4200)
    * - #{protocol} -> The protocol used (http: or https:)
    * - #{domain} -> Only the domain (localhost)
@@ -184,7 +189,7 @@ export class ApplicationsService {
    * @returns The parsed command after replacing the variables with their value.
    */
   replaceCommandVariables(url: string, command: string): string {
-    const regex = /#{(?:url|origin|protocol|domain|port|path|query|fragment|title|date|runOnCmd)}/gm;
+    const regex = /#{(?:url|rawUrl|origin|protocol|domain|port|path|query|fragment|title|date|runOnCmd)}/gm;
     let pathUrl : URL;
 
     try {
@@ -208,6 +213,9 @@ export class ApplicationsService {
         switch(matchFound) {
           case "#{url}":
             parsedCommand = parsedCommand.replaceAll("#{url}", pathUrl.href);
+            break;
+          case "#{rawUrl}":
+            parsedCommand = parsedCommand.replaceAll("#{rawUrl}", pathUrl.origin + pathUrl.pathname);
             break;
           case "#{origin}":
             parsedCommand = parsedCommand.replaceAll("#{origin}", pathUrl.origin);
@@ -328,8 +336,7 @@ export class ApplicationsService {
     let contextMenuProperties : ContextMenu = {
       title: app.name,
       contexts: contexts.length === 0 ? [MENU_CONTEXT_LIST[0]] : contexts,
-      parentId: MENU_PARENT_ID,
-      visible: contexts.length > 0,
+      visible: contexts.length > 0
     }
 
     // On firefox we need to set the icons for the context menu
@@ -344,8 +351,10 @@ export class ApplicationsService {
 
     if (isUpdate)
       chrome.contextMenus.update(contextId, contextMenuProperties);
-    else
+    else {
+      contextMenuProperties.parentId = MENU_PARENT_ID;
       chrome.contextMenus.create({...contextMenuProperties, id: contextId});
+    }
   }
 
   /**

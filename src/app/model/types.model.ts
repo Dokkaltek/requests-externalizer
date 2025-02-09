@@ -44,7 +44,7 @@ export type AppChangeEvent = {
 export type ContextMenu = {
   title: string,
   contexts: chrome.contextMenus.ContextType[],
-  parentId: string,
+  parentId?: string,
   visible: boolean,
   icons?: {
     "16": string,

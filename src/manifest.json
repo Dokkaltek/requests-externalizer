@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Request Externalizer",
-  "version": "1.0.2",
+  "version": "1.0.5",
   
   "action": {
     "default_icon": {

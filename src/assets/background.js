@@ -78,10 +78,7 @@ function updateBadge() {
             let originRequests = requestsStore.tabs[tab.id][tabOrigin];
 
             if (settings?.countType)
-                originRequests = originRequests.filter(request => {
-              console.log("resolved request type:", resolveRequestType(request.url, request.type));
-              return resolveRequestType(request.url, request.type) === settings.typeToCount
-            });
+                originRequests = originRequests.filter(request => resolveRequestType(request.url, request.type) === settings.typeToCount);
 
             if (originRequests?.length > 0) updatedText = originRequests.length + '';
           } catch (err) {
@@ -252,6 +249,7 @@ function getFormattedCurrentDate(format) {
    * 
    * The variables supported are:
    * - #{url} -> The full url (http://localhost:4200/home?id=1#2)
+   * - #{rawUrl} -> The url without query params or fragment (http://localhost:4200/home)
    * - #{origin} -> The domain, protocol, and port of the complete url (http://localhost:4200)
    * - #{protocol} -> The protocol used (http: or https:)
    * - #{domain} -> Only the domain (localhost)
@@ -267,7 +265,7 @@ function getFormattedCurrentDate(format) {
    * @returns The parsed command after replacing the variables with their value.
    */
 function replaceCommandVariables(url, command, tab) {
-  const regex = /#{(?:url|origin|protocol|domain|port|path|query|fragment|title|date|runOnCmd)}/gm;
+  const regex = /#{(?:url|rawUrl|origin|protocol|domain|port|path|query|fragment|title|date|runOnCmd)}/gm;
   const pathUrl = new URL(url);
 
   let match;
@@ -283,6 +281,9 @@ function replaceCommandVariables(url, command, tab) {
         switch(matchFound) {
           case "#{url}":
             command = command.replaceAll("#{url}", pathUrl.href);
+            break;
+          case "#{rawUrl}":
+            command = command.replaceAll("#{rawUrl}", pathUrl.origin + pathUrl.pathname);
             break;
           case "#{origin}":
             command = command.replaceAll("#{origin}", pathUrl.origin);
@@ -436,6 +437,9 @@ function createContextMenuEntries(applications) {
     visible: false
   });
 
+  // Add the listener for all elements
+  chrome.contextMenus.onClicked.addListener(performContextMenuCommand);
+
   // Initialize apps if required
   if (applications.length !== 0) {
     const childProps = generateChildrenContextMenuProps(applications);
@@ -494,9 +498,6 @@ function generateChildrenContextMenuProps(applications) {
     allAppsProps.push(contextMenuProperties);
   });
 
-  // Add the listener for all elements
-  chrome.contextMenus.onClicked.addListener(performContextMenuCommand);
-
   // Return all the contexts after filtering the duplicates
   return allAppsProps;
 }
@@ -537,9 +538,10 @@ function performContextMenuCommand(info, tab) {
     return;
   }
 
+  
   let urlToSend = info.pageUrl;
   const appId = info.menuItemId.substring(MENU_CHILD_ID_START.length);
-
+  
   // Set the link as source if it had a link
   urlToSend = info.linkUrl || info.pageUrl;
   
@@ -547,14 +549,14 @@ function performContextMenuCommand(info, tab) {
   if (info.mediaType) {
     urlToSend = info.srcUrl || info.pageUrl;
   }
-  
+
   // Load the app from storage and execute the command
   chrome.storage.local.get(APPLICATIONS).then(result => {
     let app = result[APPLICATIONS].filter(item => item.id === appId)
     if (app.length > 0) {
       let passedCommand = replaceCommandVariables(urlToSend, app[0].command.trim(), tab);
       passedCommand = replaceFunctionVariables(passedCommand);
-      console.log(`The command to send was '${passedCommand}'.`);
+      console.info(`The command to send was '${passedCommand}'.`);
 
       // Perform the command
       chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: passedCommand});

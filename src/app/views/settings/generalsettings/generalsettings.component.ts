@@ -44,8 +44,6 @@ export class GeneralsettingsComponent {
         eventTarget.value;
     }
 
-    console.log("Settings saved were: ", this.globalSettings);
-
     this.settingsService.saveGlobalSettings(this.globalSettings);
   }
 
