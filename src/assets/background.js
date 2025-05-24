@@ -439,9 +439,6 @@ function createContextMenuEntries(applications) {
     visible: false
   });
 
-  // Add the listener for all elements
-  chrome.contextMenus.onClicked.addListener(performContextMenuCommand);
-
   // Initialize apps if required
   if (applications.length !== 0) {
     const childProps = generateChildrenContextMenuProps(applications);
@@ -638,3 +635,6 @@ chrome.tabs.onRemoved.addListener(removeTabs);
 // Initializes the settings and creates the context menu entries on browser restart and on extension install
 chrome.runtime.onInstalled.addListener(initialize);
 chrome.runtime.onStartup.addListener(initialize);
+
+// Add the listener for all elements
+chrome.contextMenus.onClicked.addListener(performContextMenuCommand);
