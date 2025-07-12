@@ -19,6 +19,9 @@ export class GlobalSettings {
   darkMode: boolean = false;
   countType: boolean = false;
   typeToCount: string | null = 'document';
+  storeRequests: boolean = false;
+  ignoredDomainsRawText: string = '';
+  ignoredDomains: string[] = [];
 }
 
 /**

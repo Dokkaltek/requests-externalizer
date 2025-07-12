@@ -33,8 +33,6 @@ export class RequesttableComponent implements OnInit {
   mediaTypes: MediaTypes = new MediaTypes();
   // Active tags to filter for
   activeFilters: string[] = [];
-  // The current tab domain
-  currentDomain: string = '';
   // The search query returned from the input box
   searchQuery: string = '';
   // The request clicked to be copied
@@ -47,15 +45,15 @@ export class RequesttableComponent implements OnInit {
   ngOnInit() {
     this.getCurrentTab().then((tab: chrome.tabs.Tab) => {
       if (tab.id !== undefined && tab.url !== undefined) {
-        let domain = new URL(tab.url);
         let tabId = tab.id || 0;
-        this.currentDomain = domain.origin;
 
         // Set initial popup values from the store
         chrome.storage.local.get(PAGE_REQUESTS).then((result) => {
           if (result?.[PAGE_REQUESTS]?.tabs?.[tabId]) {
+            const requestsStore = result[PAGE_REQUESTS];
             this.fullRequestList =
-              result[PAGE_REQUESTS].tabs[tabId][this.currentDomain] ?? [];
+              Object.keys(requestsStore.tabs[tabId])
+            .map(domain => requestsStore.tabs[tabId][domain]).flat() ?? [];
             
             this.requests = [...this.fullRequestList];
 
@@ -68,10 +66,11 @@ export class RequesttableComponent implements OnInit {
         chrome.storage.onChanged.addListener((changes) => {
           for (let [key, { newValue }] of Object.entries(changes)) {
             if (key == PAGE_REQUESTS) {
-              const domainTabs = newValue.tabs?.[tabId]?.[this.currentDomain];
-              if (domainTabs && JSON.stringify(this.fullRequestList) !== JSON.stringify(domainTabs)) {
+              const tabRequests = newValue.tabs?.[tabId];
+              if (tabRequests && JSON.stringify(this.fullRequestList) !== JSON.stringify(tabRequests)) {
                 // Update the list with all unfiltered requests for the tab
-                this.fullRequestList = newValue.tabs[tabId][this.currentDomain];
+                this.fullRequestList = Object.keys(newValue.tabs[tabId])
+                      .map(domain => newValue.tabs[tabId][domain]).flat()
 
                 // Force table re-draw
                 this.updateResults();

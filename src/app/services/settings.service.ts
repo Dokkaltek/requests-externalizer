@@ -30,6 +30,7 @@ export class SettingsService {
 
   // Store settings in local storage
   saveGlobalSettings(globalSettings: GlobalSettings) {
-    chrome.storage.local.set({ settings: globalSettings });
+    chrome.storage.local.set({ settings: globalSettings })
+    .then(() => chrome.runtime.sendMessage({ data: "changedSettings" }));
   }
 }

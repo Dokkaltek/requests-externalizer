@@ -19,6 +19,20 @@
       <span class="switch">
         <input
           type="checkbox"
+          (click)="onSettingUpdate('storeRequests', $event)"
+          [checked]="globalSettings.storeRequests"
+          [ngClass]="{'hidden': !settingsLoaded}"
+        />
+        <span class="slider" [ngClass]="{'hidden': !settingsLoaded}"></span>
+      </span>
+      Store requests to show them on the requests table
+    </label>
+  </div>
+  <div class="switch-container" [ngClass]="{'disabled': !globalSettings.storeRequests}">
+    <label class="switch-content">
+      <span class="switch">
+        <input
+          type="checkbox"
           (click)="onSettingUpdate('countType', $event)"
           [checked]="globalSettings.countType"
           [ngClass]="{'hidden': !settingsLoaded}"
@@ -40,6 +54,13 @@
           {{ type | capitalize }}
         </option>
     </select>
+  </div>
+  <div class="textarea-container" [ngClass]="{'disabled': !globalSettings.storeRequests}">
+    <label>Ignore requests from the following domains (1 site per line, without commas):
+      <textarea placeholder="https://www.example.com" [(ngModel)]="textareaValue"></textarea>
+      <small class="hint">* You can add comments by adding a # at the beginning of the line</small>
+    </label>
+    <button class="btn confirm" (click)="saveIgnoreList()">Save ignore list</button>
   </div>
 
   <span id="appsBackupContainer">

@@ -24,6 +24,9 @@ export class MockGlobalSettings implements GlobalSettings {
   darkMode: boolean = false;
   countType: boolean = false;
   typeToCount: string | null = null;
+  storeRequests: boolean = false;
+  ignoredDomainsRawText: string = '';
+  ignoredDomains: string[] = [];
 }
 
 export class MockMediaQueryList implements MediaQueryList {

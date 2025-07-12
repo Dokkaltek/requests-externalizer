@@ -16,12 +16,14 @@ export class GeneralsettingsComponent {
   requestTypes: Array<string> = Object.keys(new MediaTypes());
   globalSettings: GlobalSettings = new GlobalSettings();
   settingsLoaded = false;
+  textareaValue = "";
   @ViewChild(ToastComponent) toast!: ToastComponent;
 
   constructor(private settingsService: SettingsService, private appsService: ApplicationsService) {
     // Load settings
     this.settingsService.loadGlobalSettings().then(settings => {
       this.globalSettings = settings;
+      this.textareaValue = settings.ignoredDomainsRawText;
       this.settingsLoaded = true;
     });
   }
@@ -38,6 +40,7 @@ export class GeneralsettingsComponent {
     if (eventTarget.tagName === 'INPUT' && eventTarget.type === 'checkbox') {
       (this.globalSettings[settingToUpdate as keyof GlobalSettings] as boolean) =
         !this.globalSettings[settingToUpdate as keyof GlobalSettings];
+
       // If select, update the string value
     } else if (eventTarget.tagName === 'SELECT') {
       (this.globalSettings[settingToUpdate as keyof GlobalSettings] as string) =
@@ -45,6 +48,38 @@ export class GeneralsettingsComponent {
     }
 
     this.settingsService.saveGlobalSettings(this.globalSettings);
+  }
+
+  /**
+   * Updates the ignore list with the textarea content.
+   */
+  saveIgnoreList() {
+    const textareaContent = this.textareaValue.trim();
+    if (textareaContent) {
+      let domains = textareaContent.split("\n").filter((domain) => !domain.trim().startsWith("#"))
+        .map((domain) => {
+          if (domain.endsWith("/"))
+            domain = domain.substring(0, domain.length - 1); 
+          if (domain.startsWith("https://") || domain.startsWith("http://")) {
+            try {
+              let hostname = new URL(domain).hostname;
+              if (hostname.startsWith("www."))
+                return hostname.substring(4);
+            } catch (err) {
+              console.info("❌ Invalid url: ", err);
+              return domain;
+            }
+          } else if (domain.startsWith("www.")) {
+            return domain.substring(4);
+          }
+          return domain;
+        });
+      this.globalSettings.ignoredDomains = domains;
+      this.globalSettings.ignoredDomainsRawText = this.textareaValue;
+      console.log("Updated ignored domains: ", this.globalSettings.ignoredDomains);
+      this.toast.showToast("Ignored domains list updated", ToastState.INFO);
+      this.settingsService.saveGlobalSettings(this.globalSettings);
+    }
   }
 
   /**

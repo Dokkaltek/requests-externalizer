@@ -27,6 +27,9 @@ describe('SettingsService', () => {
     service.loadGlobalSettings().then(result => {
       expect(result.countType).toBeFalsy();
       expect(result.typeToCount).toEqual(defSettings.typeToCount);
+      expect(result.storeRequests).toBeFalsy();
+      expect(result.ignoredDomains.length).toEqual(0);
+      expect(result.ignoredDomainsRawText).toEqual("");
       expect(sinonChrome.storage.local.get.callCount).toEqual(1);
       expect(sinonChrome.storage.local.set.callCount).toEqual(1);
     });

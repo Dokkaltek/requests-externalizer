@@ -11,15 +11,30 @@ const RUNNING_ON_FIREFOX = typeof browser !== "undefined";
 const AUDIO_EXTENSIONS = ["mp3", "m4a", "flac", "opus"];
 const VIDEO_EXTENSIONS = ["mpd", "m3u8", "mp4", "webm"];
 let requestsStore = {tabs: {}};
+let previousActiveTabId;
 let lastActiveTab;
+let badgeValue = '';
+let globalSettings = {};
+let requestsInProgress = false;
+let requestsListener = null;
+let tabsUrlMap = {};
 
 /**
- * Stores the requests of the current page to be used later
+ * Stores the incoming request to be used later
  * @param {*} e The tab event.
  */
-function storeRequests(e) {
+function storeRequest(e) {
   // Ignore request if it doesn't fulfill all ignore criteria
   
+  // The setting for storeRequests must be active, and the request must not be on the ignored domains list
+  const requestUrl = new URL(e.url);
+  const requestOrigin = requestUrl.origin;
+  let requestHostname = requestUrl.hostname;
+  if (requestHostname.startsWith("www.")) 
+    requestHostname = requestHostname.substring(4);
+  if (!globalSettings?.storeRequests || globalSettings?.ignoredDomains.includes(requestHostname))
+    return;
+
   // Must be an existing tab
   const isInvalidTabId = e.tabId === -1;
   // Must not be a frame request
@@ -36,68 +51,100 @@ function storeRequests(e) {
   if (isInvalidTabId || isFrame || isExtensionPath || isNotSuccessStatus || isNotGetRequest)
     return;
 
-  // Use a global variable to make sure that we keep all new requests due to race conditions
-  chrome.tabs.get(e.tabId).then(requestTab => {
-    let requestOrigin = new URL(requestTab.url).origin;
+  // Make sure that the domain entry is initialized
+  if (requestsStore.tabs[e.tabId] === undefined) requestsStore.tabs[e.tabId] = {};
+  if (requestsStore.tabs[e.tabId][requestOrigin] === undefined)
+    requestsStore.tabs[e.tabId][requestOrigin] = [];
 
-    // Make sure that the domain entry is initialized
-    if (requestsStore.tabs[e.tabId] === undefined) requestsStore.tabs[e.tabId] = {};
-    if (requestsStore.tabs[e.tabId][requestOrigin] === undefined)
-      requestsStore.tabs[e.tabId][requestOrigin] = [];
+  // Add request to storage and remove duplicates
+  for (let request of requestsStore.tabs[e.tabId][requestOrigin]) {
+    if (request.url === e.url) return;
+  }
 
-    // Add request to storage and remove duplicates
-    for (let request of requestsStore.tabs[e.tabId][requestOrigin]) {
-      if (request.url === e.url) return;
+  requestsStore.tabs[e.tabId][requestOrigin].push(e);
+
+  // Only update the storage every second
+  if (!requestsInProgress) {
+    requestsInProgress = true;
+
+    setTimeout(() => {
+      chrome.storage.local.set({ pageRequests: requestsStore });
+      requestsInProgress = false;
+    }, 500);
+  }
+
+  // Add number of found requests for the current tab on the extension icon if they are from the current tab
+  if (lastActiveTab === e.tabId) {
+    updateBadgeByRequestsType();
+  }
+}
+
+/**
+ * Update the number of requests in the extension icon.
+ */
+function updateBadgeByRequestsType() {
+    if (!lastActiveTab) return;
+    let updatedText = '';
+
+    // Get number of requests on the current tab domain
+    if (lastActiveTab && requestsStore.tabs[lastActiveTab]) {
+      
+      try {
+        let tabRequests = Object.keys(requestsStore.tabs[lastActiveTab])
+            .map(domain => requestsStore.tabs[lastActiveTab][domain]).flat();
+
+        if (tabRequests?.length > 0) {
+          if (globalSettings?.countType)
+            tabRequests = tabRequests.filter(request => resolveRequestType(request.url, request.type) === globalSettings.typeToCount);
+
+          if (tabRequests.length > 0) updatedText = tabRequests.length + '';
+        }
+      } catch (err) {
+        getCurrentTab().then(tab => {
+          console.info(
+            `❌ Tab url origin or tab id wasn't valid. Url = ${tab.url}, TabId = ${tab.id}`,
+            requestsStore.tabs, err
+          );
+        });
+      }
     }
 
-    requestsStore.tabs[e.tabId][requestOrigin].push(e);
-    chrome.storage.local.set({ pageRequests: requestsStore });
+    // Update badge
+    updateBadgeValue(updatedText);
+}
 
-    // Add number of found requests for the current tab on the extension icon
-    updateBadgeIfNecessary(e.tabId);
+/**
+ * Updates the value of the badge
+ * @param {string} value The value to update the badge with.
+ */
+function updateBadgeValue(value) {
+  if (badgeValue !== '' &&value === badgeValue) return;
+  if (parseInt(value) < parseInt(badgeValue))
+    value = (parseInt(badgeValue) + 1) + '';
+  badgeValue = value;
+  chrome.action.setBadgeText({
+    text: value,
   });
 }
 
 /**
- * Update the number of requests in the extension icon
+ * Updates the global variable storage and the storage itself.
+ * @returns The promise of the storage update.
  */
-function updateBadge() {
-  getCurrentTab()
-    .then(tab => {
-      if (!tab) return;
-      let updatedText = '';
+function updateRequestsStorage() {
+  return chrome.storage.local.get(PAGE_REQUESTS)
+    .then(result => {
+      let storage = result[PAGE_REQUESTS];
+      if (previousActiveTabId) {
+          storage.tabs[previousActiveTabId] = requestsStore.tabs[previousActiveTabId] || {};
+          chrome.storage.local.set({ pageRequests: requestsStore });
+      }
 
-      // Get number of requests on the current tab domain
-      chrome.storage.local.get(SETTINGS).then(result => {
-        let settings;
-        if (result[SETTINGS]) settings = result[SETTINGS];
-        if (tab.url && tab.id && requestsStore.tabs[tab.id]) {
-          let tabOrigin = '';
-          try {
-            tabOrigin = new URL(tab.url).origin;
-            let originRequests = requestsStore.tabs[tab.id][tabOrigin];
-
-            if (originRequests?.length > 0) {
-              if (settings?.countType)
-                originRequests = originRequests.filter(request => resolveRequestType(request.url, request.type) === settings.typeToCount);
-
-              if (originRequests.length > 0) updatedText = originRequests.length + '';
-            }
-          } catch (err) {
-            console.info(
-              `❌ Tab url origin or tab id wasn't valid. Url = ${tabOrigin}, TabId = ${tab.id}`,
-              requestsStore.tabs, err
-            );
-          }
-        }
-
-        // Update badge
-        chrome.action.setBadgeText({
-          text: updatedText,
-        });
-      });
-    })
-    .catch(err => console.info("❌ Couldn't update the badge.", err));
+      if (storage.tabs[lastActiveTab] === undefined)
+        requestsStore.tabs[lastActiveTab] = {};
+      else
+        requestsStore.tabs[lastActiveTab] = storage.tabs[lastActiveTab];
+    });
 }
 
 /**
@@ -105,32 +152,16 @@ function updateBadge() {
  * @param {*} result The tabs information that was stored.
  * @returns The requests left that weren't removed.
  */
-function cleanseStorage(result) {
+async function cleanseStorage(result) {
   let cleanResult = result;
 
-  chrome.tabs.query({}).then(tabs => {
-    for (let tab of tabs) {
-      if (!tab.url) continue;
-      let urlOrigin = new URL(tab.url).origin;
-      if (
-        cleanResult.hasOwnProperty(tab.id) &&
-        cleanResult[tab.id].hasOwnProperty(urlOrigin)
-      ) {
-        // Clean orfan url origins from a tab reference
-        let tabSessions = Object.keys(cleanResult[tab.id]);
-        if (tabSessions.length > 1) {
-          tabSessions.forEach(tabSession => {
-            if (tabSession !== urlOrigin)
-              delete cleanResult[tab.id][tabSession];
-          });
-        }
-      } else {
-        // Remove the whole tab reference
-        delete cleanResult[tab.id];
-      }
-    }
-  });
-
+  const tabs = await chrome.tabs.query({});
+  for (let tab of tabs) {
+    if (!tab.url) continue;
+    if (!cleanResult.hasOwnProperty(tab.id))
+      // Remove the whole tab reference
+      delete cleanResult[tab.id];
+  }
   return cleanResult;
 }
 
@@ -159,56 +190,32 @@ async function getCurrentTab() {
  * @returns 
  */
 function updateTabs(tabId, changedInfo, tab) {
-  if (changedInfo.status !== 'complete' || !hasTabRequests(requestsStore, tabId)) return;
-
-  if (Object.keys(requestsStore.tabs[tabId]).length > 0) {
-    let newTabOrigin = new URL(tab.url).origin;
-    let registeredDomains = Object.keys(requestsStore.tabs[tabId]);
-
-    if (registeredDomains.length >= 2) {
-      if (!registeredDomains.includes(newTabOrigin)) {
-        requestsStore.tabs[tabId] = {};
-      } else {
-        registeredDomains.forEach(domain => {
-          if (domain !== newTabOrigin) delete requestsStore.tabs[tabId][domain];
-        });
-      }
+  if (!tab.url) return;
+  let newTabOrigin = new URL(tab.url).origin;
+  if ((newTabOrigin !== tabsUrlMap[tabId]) && hasTabRequests(tabId)) {
+    tabsUrlMap[tabId] = newTabOrigin;
+    badgeValue = '';
+    if (Object.keys(requestsStore.tabs[tabId]).length > 0) {
+      requestsStore.tabs[tabId] = {};
       chrome.storage.local
         .set({ pageRequests: requestsStore });
     }
+
+    if (lastActiveTab === tabId && globalSettings?.storeRequests)
+      updateBadgeByRequestsType();
   }
-
-  updateBadgeIfNecessary(tabId);
-}
-
-/**
- * Triggers a badge update if the tab to update is the same as the active tab
- * @param {*} updatedTabId The id of the tab that is being changed to.
- */
-function updateBadgeIfNecessary(updatedTabId) {
-  getCurrentTab()
-    .then(tab => {
-      if (tab && tab.id === updatedTabId) updateBadge();
-    })
-    .catch(err =>
-      console.info(
-        "❌ There was an error and couldn't update the extension badge. ",
-        err,
-      ),
-    );
 }
 
 /**
  * Check if the passed tab has stored requests
- * @param {*} storeObject The local storage object to check requests in.
  * @param {*} tabId The tab identifier to check for requests.
  * @returns True if the tab has requests stored, false otherwise.
  */
-function hasTabRequests(storeObject, tabId) {
+function hasTabRequests(tabId) {
   if (!tabId) return false;
   return (
-    storeObject.tabs != null &&
-    storeObject.tabs[tabId]
+    requestsStore.tabs != null &&
+    requestsStore.tabs[tabId]
   );
 }
 
@@ -217,6 +224,7 @@ function hasTabRequests(storeObject, tabId) {
  * @param {*} tabId The tab identifier to delete their requests.
  */
 function removeTabs(tabId) {
+  delete tabsUrlMap[tabId];
   if (!tabId || !hasTabRequests(requestsStore, tabId)) return;
 
   if (Object.keys(requestsStore.tabs[tabId]).length > 0) {
@@ -232,9 +240,12 @@ function removeTabs(tabId) {
  */
 function storeAndUpdateActiveTab(activeInfo) {
   // We need to store the last active tab since when the active tab is loading,
-  // getActiveTab returns undefined
+  // getCurrentTab returns undefined
+  previousActiveTabId = lastActiveTab;
   lastActiveTab = activeInfo.tabId;
-  updateBadge();
+  badgeValue = '';
+  if (globalSettings?.storeRequests)
+    updateRequestsStorage().then(() => updateBadgeByRequestsType());
 }
 
 /**
@@ -575,15 +586,17 @@ function initialize() {
     if (requestsObj === 0) requestsObj = {};
     if (requestsObj.tabs === undefined) requestsObj.tabs = {};
 
-    requestsObj.tabs = cleanseStorage(requestsObj.tabs);
+    cleanseStorage(requestsObj.tabs).then((requestTabs) => {
+      requestsObj.tabs = requestTabs
 
-    // Initialize only if required
-    if (!result[PAGE_REQUESTS])
-      chrome.storage.local.set({ pageRequests: requestsObj });
+        // Initialize only if required
+      if (!result[PAGE_REQUESTS])
+        chrome.storage.local.set({ pageRequests: requestsObj });
 
-    requestsStore = requestsObj;
+      requestsStore = requestsObj;
 
-    console.info('Starting Externalizer with requests storage: ', requestsObj)
+      console.info('Starting Externalizer with requests storage: ', requestsObj)
+    });
   });
 
   // Give initial values to the registered applications object
@@ -607,6 +620,9 @@ function initialize() {
       darkMode: null,
       countType: false,
       typeToCount: 'document',
+      storeRequests: false,
+      ignoredDomainsRawText: '',
+      ignoredDomains: []
     };
 
     let settingsObj = result[SETTINGS] ?? defaultSettings;
@@ -617,13 +633,56 @@ function initialize() {
 
     // Initialize only if required
     if (!result[SETTINGS]) chrome.storage.local.set({ settings: settingsObj });
+    globalSettings = settingsObj;
+
+    // Store all requests per url
+    if (globalSettings !== undefined && globalSettings.storeRequests) {
+      requestsListener = chrome.webRequest.onCompleted.addListener(storeRequest, {
+        urls: ['<all_urls>'],
+      });
+    }
+  });
+
+  // Add the first current tab
+  getCurrentTab().then(tab => {
+    lastActiveTab = tab;
   });
 }
 
-// Store all requests per url
-chrome.webRequest.onCompleted.addListener(storeRequests, {
-  urls: ['<all_urls>'],
-});
+/**
+ * Updates the global settings of the app.
+ * @param {*} message The message sent from the content script.
+ */
+function updateSettings(message) {
+  if (message.data === "changedSettings") {
+    chrome.storage.local.get(SETTINGS).then(result => {
+      let defaultSettings = {
+        darkMode: null,
+        countType: false,
+        typeToCount: 'document',
+      };
+
+      let settingsObj = result[SETTINGS] ?? defaultSettings;
+      if (settingsObj === 0) settingsObj = defaultSettings;
+
+      // Initialize only if required
+      globalSettings = settingsObj;
+
+      if (globalSettings.storeRequests) {
+        requestsListener = chrome.webRequest.onCompleted.addListener(storeRequest, {
+          urls: ['<all_urls>'],
+        });
+      } else {
+        badgeValue = '';
+        updateBadgeValue(badgeValue);
+        if (requestsListener) {
+          chrome.webRequest.onCompleted.removeListener(requestsListener);
+          requestsListener = null;
+        }
+      }
+    });
+  }
+}
 
 // Update extension badge text on tab change
 chrome.tabs.onActivated.addListener(storeAndUpdateActiveTab);
@@ -638,3 +697,6 @@ chrome.runtime.onStartup.addListener(initialize);
 
 // Add the listener for all elements
 chrome.contextMenus.onClicked.addListener(performContextMenuCommand);
+
+// Update global settings when they change
+chrome.runtime.onMessage.addListener(updateSettings);

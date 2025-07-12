@@ -26,7 +26,8 @@ For Chrome/chromium browsers you will have to remove the `scripts`, `key` and `b
 "browser_specific_settings": {
   "gecko": {
     "id": "requests-externalizer@dokkaltek.es",
-    "strict_min_version": "109.0"
+    "strict_min_version": "126.0",
+    "update_url": "https://raw.githubusercontent.com/Dokkaltek/requests-externalizer/refs/heads/main/firefox-updates.json"
   } 
 },
 "key": "MIIBIjANBgkqhki ... "

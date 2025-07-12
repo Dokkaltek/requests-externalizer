@@ -2,6 +2,9 @@
 $primary: #1749c7
 $primary-hover: #1e56e6
 $primary-active: #113aa0
+$confirm: #096a26
+$confirm-hover: #0b7e2e
+$confirm-active: #07531e
 $cancel: #c71717
 $cancel-hover: #e61e1e
 $cancel-active: #a01111
@@ -62,6 +65,15 @@ p, li
 .btn.primary:active
     background-color: $primary-active
 
+.btn.confirm
+    background-color: $confirm
+
+.btn.confirm:hover
+    background-color: $confirm-hover
+
+.btn.confirm:active
+    background-color: $confirm-active
+
 .btn.cancel
     background-color: $cancel
 
@@ -70,6 +82,13 @@ p, li
 
 .btn.cancel:active
     background-color: $cancel-active
+
+.disabled
+    opacity: 0.5
+    pointer-events: none
+
+.hidden
+  display: none
 
 /* Text inputs */
 input[type="text"], textarea
