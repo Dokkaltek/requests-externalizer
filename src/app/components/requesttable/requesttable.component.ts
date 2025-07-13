@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { LOGGING_WARN_COLOR } from 'src/app/model/error.constants';
 import { MediaTypes } from 'src/app/model/types.model';
+import { ExtensionTypes } from 'src/app/model/types.model';
 import { PAGE_REQUESTS } from '../../model/storage.constants';
 
 @Component({
@@ -17,6 +18,7 @@ import { PAGE_REQUESTS } from '../../model/storage.constants';
   styleUrls: ['./requesttable.component.sass'],
 })
 export class RequesttableComponent implements OnInit {
+  
   // Event that triggers when element selection changes
   @Output() requestsSelection: EventEmitter<string[]> = new EventEmitter();
   @ViewChild("copyContext") copyContextMenu: ElementRef = new ElementRef(null);
@@ -31,6 +33,8 @@ export class RequesttableComponent implements OnInit {
   selectedItems: chrome.webRequest.ResourceRequest[] = [];
   // Helper mediatype object to get available types to filter for
   mediaTypes: MediaTypes = new MediaTypes();
+  // Helper extension object to get available types to filter for
+  extensionTypes: ExtensionTypes = new ExtensionTypes();
   // Active tags to filter for
   activeFilters: string[] = [];
   // The search query returned from the input box
@@ -129,8 +133,7 @@ export class RequesttableComponent implements OnInit {
     let reqArray = request.split('/');
     let reqLastPath = reqArray[reqArray.length - 1]
       .split('#')[0]
-      .split('?')[0]
-      .split('=')[0];
+      .split('?')[0];
     if (reqLastPath.indexOf('.') !== -1)
       return (
         type + ' / ' + reqLastPath.split('.')[reqLastPath.split('.').length - 1]
@@ -147,10 +150,21 @@ export class RequesttableComponent implements OnInit {
   getIconType(request: string, type: string) {
     let reqType = this.getRequestType(request, type, true);
     let ext: string | undefined;
+    let extType = "unknown";
     if (reqType.includes("/")) {
       ext = reqType.split("/")[1].trim();
       reqType = reqType.split("/")[0].trim();
     }
+
+    if (ext !== undefined) {
+      if (this.extensionTypes.audio.includes(ext))
+        extType = "audio";
+      else if (this.extensionTypes.image.includes(ext))
+        extType = "image";
+      else if (this.extensionTypes.video.includes(ext))
+        extType = "video";
+    }
+    
 
     switch(reqType) {
       case "request":
@@ -163,7 +177,7 @@ export class RequesttableComponent implements OnInit {
         reqType = "🎨";
         break;
       case "media":
-        if (ext === "mp3" || ext == "m4a" || ext === "flac" || ext === "opus")
+        if (extType === "audio")
           reqType = "🎵";
         else 
           reqType = "🎞️";
@@ -175,7 +189,20 @@ export class RequesttableComponent implements OnInit {
         reqType = "🖋️";
         break;
       default:
-        reqType = "🌐";
+        switch(extType) {
+          case "video":
+            reqType = "🎞️"
+            break;
+          case "audio":
+            reqType = "🎵"
+            break;
+          case "image":
+            reqType = "🖼️"
+            break;
+          default:
+            reqType = "🌐"
+            break;
+        }
         break;
     }
 
@@ -204,20 +231,21 @@ export class RequesttableComponent implements OnInit {
 
       for (const filter of this.activeFilters) {
         // Check the type of element to filter the ticked ones
-        const simpleType = type.split("/")[0].trim();
-        
-        // If the filter is misc, check if the type is odd video or odd image
-        if (filter === "misc") {
-          const isOddVideoOrImage = simpleType === "xmlhttprequest" && 
-            (this.mediaTypes["video"].includes(type) || this.mediaTypes["image"].includes(type));
-          const isOddDocument = simpleType === "other" && (this.mediaTypes["document"].includes(type));
-          if (isOddVideoOrImage || isOddDocument)
-            continue;
+        const typeFragments = type.split("/");
+        const simpleType = typeFragments[0].trim();
+        let extension = "";
+        if (typeFragments.length > 1) {
+          extension = typeFragments[1].trim();
         }
+
+        // If the extension matches the filter, we return true
+        const isValidAudio = filter === "audio" && this.extensionTypes.audio.includes(extension);
+        const isValidVideo = filter === "video" && this.extensionTypes.video.includes(extension);
+        const isValidImage = filter === "image" && this.extensionTypes.image.includes(extension);
+        const isValidDocument = filter === "document" && this.extensionTypes.document.includes(extension);
         
-        // If the filter is video and the type is media and it's an audio type, we exit the filter
-        if (filter === "video" && simpleType === "media" && this.mediaTypes["audio"].includes(type))
-          continue;
+        if (isValidAudio || isValidVideo || isValidImage || isValidDocument)
+          return true;
           
         const allowedMediaTypes = this.mediaTypes[filter as keyof MediaTypes];
         if (allowedMediaTypes?.includes(type) || allowedMediaTypes?.includes(simpleType))

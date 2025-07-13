@@ -4,12 +4,22 @@ import { Application } from "./application.model";
  * Media type for requests
  */
 export class MediaTypes {
-  document = ['document', 'font', 'other / json', 'other / xml'];
-  video = ['video', 'media', 'xmlhttprequest / mpd', 'xmlhttprequest / m3u8', 'media / mp4', 'media / webm'];
-  image = ['image', 'xmlhttprequest / svg'];
+  document = ['document', 'font'];
+  video = ['video', 'media'];
+  image = ['image'];
   audio = ['media / mp3', 'media / opus', 'media / m4a', 'media / flac'];
   script = ['script', 'stylesheet'];
   misc = ['other', 'xmlhttprequest'];
+}
+
+/**
+ * Extension types for content media types.
+ */
+export class ExtensionTypes {
+  document = ['json', 'xml'];
+  video = ['mpd', 'm3u8', 'mp4', 'webm'];
+  image = ['svg', 'png', 'jpg', 'gif', 'webp', 'avif', 'jpeg', 'tif', 'tiff', 'heif', 'apng'];
+  audio = ['mp3', 'opus', 'm4a', 'flac'];
 }
 
 /**
