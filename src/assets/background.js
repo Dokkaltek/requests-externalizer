@@ -63,7 +63,7 @@ function storeRequest(e) {
 
   requestsStore.tabs[e.tabId][requestOrigin].push(e);
 
-  // Only update the storage every second
+  // Only update the storage every 0.5 seconds
   if (!requestsInProgress) {
     requestsInProgress = true;
 

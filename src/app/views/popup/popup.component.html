@@ -28,10 +28,17 @@
       </button>
     </div>
   </header>
-  <app-requesttable (requestsSelection)="onRequestsSelectionChange($event)"></app-requesttable>
-  <app-requestsender *ngIf="isNativeAppInstalled" [urlsToSend]="requestsSelected"></app-requestsender>
-  <span *ngIf="!isNativeAppInstalled" id="nativeAppWarning">
-    <p>⚠️ You need to install the <a href="https://github.com/Dokkaltek/requests-externalizer-native-app">native app</a> to start sending requests to external applications.</p>
-    <button (click)="testNativeAppConnection()">Try now</button>
+  <div *ngIf="settings?.storeRequests">
+    <app-requesttable (requestsSelection)="onRequestsSelectionChange($event)"></app-requesttable>
+    <app-requestsender *ngIf="isNativeAppInstalled" [urlsToSend]="requestsSelected"></app-requestsender>
+    
+    <span *ngIf="!isNativeAppInstalled" id="nativeAppWarning">
+      <p>⚠️ You need to install the <a href="https://github.com/Dokkaltek/requests-externalizer-native-app">native app</a> to start sending requests to external applications.</p>
+      <button (click)="testNativeAppConnection()">Try now</button>
+    </span>
+  </div>
+
+  <span *ngIf="!settings?.storeRequests" id="storeRequestsWarning">
+    <p>ℹ️ You need to enable the "<b>Store requests to show them on the requests table</b>" option in the <a href="#" (click)="openSettingsPage()">settings</a> to see stored requests.</p>
   </span>
 </div>
