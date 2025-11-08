@@ -419,7 +419,8 @@ export class ApplicationsService {
     console.info(`The command to send was '${passedCommand}'.`);
 
     // Send the parsed command to the native app
-    this.sendToNativeApp(passedCommand);
+    this.sendToNativeApp(passedCommand).catch(err => console.info(
+        "❌An unexpected error happened while sending the command to the native app.", err));
   }
 
   /**
@@ -427,7 +428,6 @@ export class ApplicationsService {
    * @param message The command to send to the terminal to be executed.
    */
   sendToNativeApp(message: string) {
-      return chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: message}).catch(err => console.info(
-        "❌An unexpected error happened while sending the command to the native app.", err));
+    return chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: message});
   }
 }
