@@ -32,7 +32,7 @@ function storeRequest(e) {
   let requestHostname = requestUrl.hostname;
   if (requestHostname.startsWith("www.")) 
     requestHostname = requestHostname.substring(4);
-  if (!globalSettings?.storeRequests || globalSettings?.ignoredDomains.includes(requestHostname))
+  if (!globalSettings?.storeRequests || globalSettings?.ignoredDomains?.includes(requestHostname))
     return;
 
   // Must be an existing tab

@@ -427,6 +427,7 @@ export class ApplicationsService {
    * @param message The command to send to the terminal to be executed.
    */
   sendToNativeApp(message: string) {
-      return chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: message});
+      return chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: message}).catch(err => console.info(
+        "❌An unexpected error happened while sending the command to the native app.", err));
   }
 }
