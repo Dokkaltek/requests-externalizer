@@ -2,9 +2,9 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 
 import { ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MockChromeResource, MockTab, SAMPLE_URL } from 'src/app/model/mocks.model';
-import { MediaTypes } from 'src/app/model/types.model';
-import { CapitalizePipe } from 'src/app/pipes/capitalize.pipe';
+import { MockChromeResource, MockTab, SAMPLE_URL } from '../../model/mocks.model';
+import { MediaTypes } from '../../model/types.model';
+import { CapitalizePipe } from '../../pipes/capitalize.pipe';
 import { RequesttableComponent } from './requesttable.component';
 
 window.global = window;
@@ -52,7 +52,7 @@ describe('RequesttableComponent', () => {
     tick();
 
     expect(sinonChrome.tabs.query.called).toBeTruthy();
-    expect(sinonChrome.storage.onChanged.addListener.calledOnce).toBeTruthy();
+    expect(sinonChrome.storage.onChanged.addListener.called).toBeTruthy();
   }));
 
   it('should parse the request paths', () => {

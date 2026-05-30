@@ -1,14 +1,14 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 
-import { GlobalSettings } from 'src/app/model/types.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
-import { SettingsService } from 'src/app/services/settings.service';
+import { GlobalSettings } from '../../model/types.model';
+import { ApplicationsService } from '../../services/applications.service';
+import { SettingsService } from '../../services/settings.service';
 import { PopupComponent } from './popup.component';
-import { RequesttableComponent } from 'src/app/components/requesttable/requesttable.component';
-import { RequestsenderComponent } from 'src/app/components/requestsender/requestsender.component';
-import { AppselectorComponent } from 'src/app/components/appselector/appselector.component';
+import { RequesttableComponent } from '../../components/requesttable/requesttable.component';
+import { RequestsenderComponent } from '../../components/requestsender/requestsender.component';
+import { AppselectorComponent } from '../../components/appselector/appselector.component';
 import { FormsModule } from '@angular/forms';
-import { CapitalizePipe } from 'src/app/pipes/capitalize.pipe';
+import { CapitalizePipe } from '../../pipes/capitalize.pipe';
 
 const sinonChrome = require('sinon-chrome');
 global.chrome = sinonChrome;

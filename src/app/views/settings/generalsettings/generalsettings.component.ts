@@ -1,10 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
-import { EXTENSION_VERSION } from 'src/app/model/storage.constants';
-import { GlobalSettings, MediaTypes, ToastState } from 'src/app/model/types.model';
+import { EXTENSION_VERSION } from '../../../model/storage.constants';
+import { GlobalSettings, MediaTypes, ToastState } from '../../../model/types.model';
 import { SettingsService } from '../../../services/settings.service';
-import { ApplicationsService } from 'src/app/services/applications.service';
-import { Application } from 'src/app/model/application.model';
-import { ToastComponent } from 'src/app/components/toast/toast.component';
+import { ApplicationsService } from '../../../services/applications.service';
+import { Application } from '../../../model/application.model';
+import { ToastComponent } from '../../../components/toast/toast.component';
 
 @Component({
   selector: 'app-generalsettings',

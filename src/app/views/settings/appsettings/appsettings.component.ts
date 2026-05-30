@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { ToastComponent } from 'src/app/components/toast/toast.component';
-import { Application } from 'src/app/model/application.model';
-import { AppChangeEvent, AppEventType, ToastState } from 'src/app/model/types.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
+import { ToastComponent } from '../../../components/toast/toast.component';
+import { Application } from '../../../model/application.model';
+import { AppChangeEvent, AppEventType, ToastState } from '../../../model/types.model';
+import { ApplicationsService } from '../../../services/applications.service';
 
 @Component({
   selector: 'app-appsettings',

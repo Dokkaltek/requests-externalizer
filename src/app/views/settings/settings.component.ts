@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ToastComponent } from 'src/app/components/toast/toast.component';
-import { LOGGING_WARN_COLOR, NATIVE_APP_ERROR } from 'src/app/model/error.constants';
-import { EXTENSION_VERSION } from 'src/app/model/storage.constants';
-import { ToastState } from 'src/app/model/types.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
+import { ToastComponent } from '../../components/toast/toast.component';
+import { LOGGING_WARN_COLOR, NATIVE_APP_ERROR } from '../../model/error.constants';
+import { EXTENSION_VERSION } from '../../model/storage.constants';
+import { ToastState } from '../../model/types.model';
+import { ApplicationsService } from '../../services/applications.service';
 
 @Component({
   selector: 'app-settings',
@@ -28,7 +28,7 @@ export class SettingsComponent implements OnInit {
    */
   testNativeAppConnection(shouldTest: boolean, showToast: boolean = true) {
     if (shouldTest) {
-      this.appService.sendToNativeApp("").catch(error => {
+      this.appService.sendToNativeApp("").catch((error: any) => {
         this.isNativeAppFound = false
 
         // Set the console message with a yellow color instead of console.warn to avoid the extension from showing the "errors" button on extensions page

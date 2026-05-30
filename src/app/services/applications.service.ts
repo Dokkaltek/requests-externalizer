@@ -12,7 +12,6 @@ const DUPLICATE_NAME_ERROR = "An app with that name already exists!";
 const MENU_PARENT_ID = 'request-externalizer-ext-parent-menu';
 const MENU_CHILD_ID_START = 'req-ext-menuitem-';
 const MENU_CONTEXT_LIST: chrome.contextMenus.ContextType[] = ["page", "link", "image", "video", "audio"];
-const NATIVE_APP_NAME = "es.requests.externalizer";
 const RUNNING_ON_FIREFOX = window.hasOwnProperty("browser");
 
 /**
@@ -419,7 +418,7 @@ export class ApplicationsService {
     console.info(`The command to send was '${passedCommand}'.`);
 
     // Send the parsed command to the native app
-    this.sendToNativeApp(passedCommand).catch(err => console.info(
+    this.sendToNativeApp(passedCommand).catch((err: any) => console.info(
         "❌An unexpected error happened while sending the command to the native app.", err));
   }
 
@@ -427,7 +426,7 @@ export class ApplicationsService {
    * Sends a command to the terminal.
    * @param message The command to send to the terminal to be executed.
    */
-  sendToNativeApp(message: string) {
-    return chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: message});
+  sendToNativeApp(message: string): Promise<any> {
+    return chrome.runtime.sendMessage({event: "nativeAppExecution", command: message});
   }
 }

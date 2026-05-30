@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EXTENSION_VERSION } from 'src/app/model/storage.constants';
+import { EXTENSION_VERSION } from '../../../model/storage.constants';
 import { AboutComponent } from './about.component';
 
 describe('AboutComponent', () => {

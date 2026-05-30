@@ -1,7 +1,7 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { DEFAULT_APP } from 'src/app/model/application.model';
-import { SAMPLE_APPLICATION } from 'src/app/model/mocks.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
+import { DEFAULT_APP } from '../../model/application.model';
+import { SAMPLE_APPLICATION } from '../../model/mocks.model';
+import { ApplicationsService } from '../../services/applications.service';
 import { AppselectorComponent } from '../appselector/appselector.component';
 import { RequestsenderComponent } from './requestsender.component';
 

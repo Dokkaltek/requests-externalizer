@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ToastState } from 'src/app/model/types.model';
+import { ToastState } from '../../model/types.model';
 import { ToastComponent } from './toast.component';
 
 describe('ToastComponent', () => {

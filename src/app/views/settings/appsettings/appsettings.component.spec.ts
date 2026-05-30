@@ -1,12 +1,12 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 
 import { ReactiveFormsModule } from '@angular/forms';
-import { ApporganizerComponent } from 'src/app/components/apporganizer/apporganizer.component';
-import { ToastComponent } from 'src/app/components/toast/toast.component';
-import { DEFAULT_APP } from 'src/app/model/application.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
+import { ApporganizerComponent } from '../../../components/apporganizer/apporganizer.component';
+import { ToastComponent } from '../../../components/toast/toast.component';
+import { DEFAULT_APP } from '../../../model/application.model';
+import { ApplicationsService } from '../../../services/applications.service';
 import { AppsettingsComponent } from './appsettings.component';
-import { AppEventType } from 'src/app/model/types.model';
+import { AppEventType } from '../../../model/types.model';
 
 describe('AppsettingsComponent', () => {
   let component: AppsettingsComponent;

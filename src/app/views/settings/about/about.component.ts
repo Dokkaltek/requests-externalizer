@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { EXTENSION_VERSION } from 'src/app/model/storage.constants';
+import { EXTENSION_VERSION } from '../../../model/storage.constants';
 
 @Component({
   selector: 'app-about',

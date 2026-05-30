@@ -7,9 +7,9 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { LOGGING_WARN_COLOR } from 'src/app/model/error.constants';
-import { MediaTypes } from 'src/app/model/types.model';
-import { ExtensionTypes } from 'src/app/model/types.model';
+import { LOGGING_WARN_COLOR } from '../../model/error.constants';
+import { MediaTypes } from '../../model/types.model';
+import { ExtensionTypes } from '../../model/types.model';
 import { PAGE_REQUESTS } from '../../model/storage.constants';
 
 @Component({

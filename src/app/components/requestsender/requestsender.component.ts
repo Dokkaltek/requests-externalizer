@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Application, DEFAULT_APP } from 'src/app/model/application.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
+import { Application, DEFAULT_APP } from '../../model/application.model';
+import { ApplicationsService } from '../../services/applications.service';
 
 @Component({
   selector: 'app-requestsender',

@@ -10,6 +10,7 @@ const NATIVE_APP_NAME = "es.requests.externalizer";
 const RUNNING_ON_FIREFOX = typeof browser !== "undefined";
 const AUDIO_EXTENSIONS = ["mp3", "m4a", "flac", "opus"];
 const VIDEO_EXTENSIONS = ["mpd", "m3u8", "mp4", "webm"];
+const NATIVE_APP_PORT = chrome.runtime.connectNative(NATIVE_APP_NAME);
 let requestsStore = {tabs: {}};
 let previousActiveTabId;
 let lastActiveTab;
@@ -539,6 +540,18 @@ function getContextsOfApp(app) {
 }
 
 /**
+ * Sends a message to the native app to be executed.
+ * @param {String} passedCommand The command to execute.
+ */
+function sendToNativeApp(passedCommand) {
+  try {
+    NATIVE_APP_PORT.postMessage({value: passedCommand});
+  } catch (err) {
+    console.info("❌An unexpected error happened while sending the command to the native app.", err);
+  }
+}
+
+/**
  * Performs the context menu command that is set for the application clicked.
  * @param {chrome.contextMenus.OnClickData} info The information object of the context menu clicked.
  * @param {chrome.tabs.Tab | undefined} tab - The tab information
@@ -569,8 +582,7 @@ function performContextMenuCommand(info, tab) {
       console.info(`The command to send was '${passedCommand}'.`);
 
       // Perform the command
-      chrome.runtime.sendNativeMessage(NATIVE_APP_NAME, {value: passedCommand}).catch(err => console.info(
-        "❌An unexpected error happened while sending the command to the native app.", err));
+      sendToNativeApp(passedCommand);
     }
   })
 }
@@ -698,5 +710,12 @@ chrome.runtime.onStartup.addListener(initialize);
 // Add the listener for all elements
 chrome.contextMenus.onClicked.addListener(performContextMenuCommand);
 
-// Update global settings when they change
-chrome.runtime.onMessage.addListener(updateSettings);
+// Update global settings when they change or send native app message
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.event === "changedSettings")
+    updateSettings()
+  else if (message.event === "nativeAppExecution")
+    sendToNativeApp(message.command);
+  else
+    console.warn("⚠️ Unknown message sent to background script: ", message);
+});

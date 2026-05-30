@@ -1,6 +1,5 @@
-import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { ToastState } from 'src/app/model/types.model';
+import { ToastState } from '../../model/types.model';
 
 @Component({
   selector: 'app-toast',

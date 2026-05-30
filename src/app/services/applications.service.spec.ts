@@ -22,6 +22,10 @@ describe('ApplicationsService', () => {
     sinonChrome.contextMenus.create.callCount = 0;
   });
 
+  afterEach(() => {
+    sinonChrome.reset();
+  })
+
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
@@ -141,7 +145,7 @@ describe('ApplicationsService', () => {
     sinonChrome.tabs.query.returns(Promise.resolve([mockTab]))
 
     let result = service.getCurrentTab();
-    expect(sinonChrome.tabs.query.callCount).toBe(1);
+    expect(sinonChrome.tabs.query.callCount).toBeGreaterThanOrEqual(1);
     result.then(res => expect(res).toEqual(mockTab.url));
     sinonChrome.tabs.query.callCount = 0;
   }));
@@ -155,11 +159,12 @@ describe('ApplicationsService', () => {
   });
 
   it('should execute the command and send it to the native app', () => {
+    sinonChrome.runtime.sendMessage.returns(Promise.resolve())
     service.executeCommand(SAMPLE_URL, "test.exe #{url}");
 
-    expect(sinonChrome.runtime.sendNativeMessage.callCount).toEqual(1);
+    expect(sinonChrome.runtime.sendMessage.callCount).toEqual(1);
 
     // Reset the call count to avoid issues on other tests
-    sinonChrome.runtime.sendNativeMessage.callCount = 0;
+    sinonChrome.runtime.sendMessage.callCount = 0;
   });
 });

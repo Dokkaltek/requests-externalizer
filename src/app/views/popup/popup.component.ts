@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { LOGGING_WARN_COLOR, NATIVE_APP_ERROR } from 'src/app/model/error.constants';
-import { GlobalSettings } from 'src/app/model/types.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
-import { SettingsService } from 'src/app/services/settings.service';
+import { LOGGING_WARN_COLOR, NATIVE_APP_ERROR } from '../../model/error.constants';
+import { GlobalSettings } from '../../model/types.model';
+import { ApplicationsService } from '../../services/applications.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-popup',

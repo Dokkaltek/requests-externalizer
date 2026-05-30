@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Application, DEFAULT_APP } from 'src/app/model/application.model';
+import { Application, DEFAULT_APP } from '../../model/application.model';
 
 @Component({
   selector: 'app-appselector',
@@ -11,7 +11,7 @@ import { Application, DEFAULT_APP } from 'src/app/model/application.model';
     {
       provide: NG_VALUE_ACCESSOR,
       multi: true,
-      useExisting: AppselectorComponent,
+      useExisting: forwardRef(() => AppselectorComponent)
     },
   ],
 })

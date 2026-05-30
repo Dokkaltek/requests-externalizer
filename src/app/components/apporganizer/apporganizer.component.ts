@@ -1,7 +1,7 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Application, DEFAULT_APP, NEW_APP } from 'src/app/model/application.model';
-import { AppChangeEvent, AppEventType } from 'src/app/model/types.model';
+import { Application, DEFAULT_APP, NEW_APP } from '../../model/application.model';
+import { AppChangeEvent, AppEventType } from '../../model/types.model';
 
 @Component({
   selector: 'app-apporganizer',
@@ -12,7 +12,7 @@ import { AppChangeEvent, AppEventType } from 'src/app/model/types.model';
     {
       provide: NG_VALUE_ACCESSOR,
       multi: true,
-      useExisting: ApporganizerComponent,
+      useExisting: forwardRef(() => ApporganizerComponent),
     },
   ],
 })

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ApplicationsService } from 'src/app/services/applications.service';
+import { ApplicationsService } from '../../../services/applications.service';
 
 @Component({
   selector: 'app-howto',

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppselectorComponent } from './appselector.component';
-import { DEFAULT_APP } from 'src/app/model/application.model';
-import { SAMPLE_APPLICATION } from 'src/app/model/mocks.model';
+import { DEFAULT_APP } from '../../model/application.model';
+import { SAMPLE_APPLICATION } from '../../model/mocks.model';
 
 describe('AppselectorComponent', () => {
   let component: AppselectorComponent;

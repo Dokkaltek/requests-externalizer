@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
-import { ToastComponent } from 'src/app/components/toast/toast.component';
-import { ToastState } from 'src/app/model/types.model';
-import { ApplicationsService } from 'src/app/services/applications.service';
+import { ToastComponent } from '../../components/toast/toast.component';
+import { ToastState } from '../../model/types.model';
+import { ApplicationsService } from '../../services/applications.service';
 import { SettingsComponent } from './settings.component';
 
 import { RouterTestingModule } from '@angular/router/testing';
-import { MockChangeDetectorRef } from 'src/app/model/mocks.model';
+import { MockChangeDetectorRef } from '../../model/mocks.model';
 
 describe('SettingsComponent', () => {
   let component: SettingsComponent;

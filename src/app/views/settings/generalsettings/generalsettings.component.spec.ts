@@ -1,12 +1,13 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 
-import { ToastComponent } from 'src/app/components/toast/toast.component';
-import { GlobalSettings, MediaTypes } from 'src/app/model/types.model';
-import { CapitalizePipe } from 'src/app/pipes/capitalize.pipe';
-import { ApplicationsService } from 'src/app/services/applications.service';
-import { SettingsService } from 'src/app/services/settings.service';
+import { ToastComponent } from '../../../components/toast/toast.component';
+import { GlobalSettings, MediaTypes } from '../../../model/types.model';
+import { CapitalizePipe } from '../../..//pipes/capitalize.pipe';
+import { ApplicationsService } from '../../../services/applications.service';
+import { SettingsService } from '../../../services/settings.service';
 import { GeneralsettingsComponent } from './generalsettings.component';
-import { DEFAULT_APP } from 'src/app/model/application.model';
+import { DEFAULT_APP } from '../../../model/application.model';
+import { FormsModule } from '@angular/forms';
 
 describe('GeneralsettingsComponent', () => {
   let component: GeneralsettingsComponent;
@@ -17,6 +18,7 @@ describe('GeneralsettingsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ GeneralsettingsComponent, ToastComponent, CapitalizePipe ],
+      imports: [FormsModule],
       providers: [SettingsService, ApplicationsService]
     })
     .compileComponents();
